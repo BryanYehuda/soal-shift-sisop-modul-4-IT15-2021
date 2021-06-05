@@ -10,9 +10,88 @@
  
 char *dir_path = "/home/ianfelix/Downloads";
 char *log_path = "/home/ianfelix/SinSeiFS.log";
+char upper_case[]={'Z', 'Y', 'X', 'W', 'V', 'U',
+                   'T', 'S', 'R', 'Q', 'P', 'O',
+                   'N', 'M', 'L', 'K', 'J', 'I', 
+                   'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'};
+               
+char lower_case[]={'z', 'y', 'x', 'w', 'v', 'u',
+                    't', 's', 'r', 'q', 'p', 'o',
+                    'n', 'm', 'l', 'k', 'j', 'i',
+                    'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'};    
 char atbash[1000] = "~!@#$%^&*(~!@#$%^&*()-=_+,./?>)-=_+,./?><;:[]}{\|\<;:[]}{|\0123457890123456789ABCDEFGHIJZYXWVUTSRQABCDEFGHIJKLMNOPQRSTPONMLKJIHGKLMNOPQRSTabcdefghijzyxwvutsrqabcdefghijklmnopqrstponmlkjihgklmnopqrst";
 char rot[1000] = "~!@#$%^&*(~!@#$%^&*()-=_+,./?>)-=_+,./?><;:[]}{\|\<;:[]}{|\0123457890123456789ABCDEFGHIJNOPQRSTUVWABCDEFGHIJKLMNOPQRSTXYZABCDEFGKLMNOPQRSTabcdefghijnopqrstuvwabcdefghijklmnopqrstxyzabcdefgklmnopqrst";
 
+void enc(char* encrypt)
+{
+  if(!strcmp(encrypt,".") || !strcmp(encrypt,"..")) return;
+  char temp[1000];
+  sprintf(temp, "%s",encrypt);
+    int a = strlen(encrypt);
+    for(int i=0; i<a; i++){
+      encrypt[i]=temp[a-i-1];
+    }
+}
+ 
+void dec(char* decrypt)
+{
+  if(!strcmp(decrypt,".") || !strcmp(decrypt,"..")) return;
+  char temp[1000];
+  sprintf(temp, "%s",decrypt);
+    int a = strlen(decrypt);
+    for(int i=0; i<a; i++){
+      decrypt[i]=temp[a-i-1];
+    }
+}
+
+void listFilesRecursively(char *basePath)
+{
+    char path[1000];
+    struct dirent *dp;
+    DIR *dir = opendir(basePath);
+
+    if (!dir)
+        return;
+
+    while ((dp = readdir(dir)) != NULL)
+    {
+        if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
+        {
+            printf("%s\n", dp->d_name);
+
+            // Construct new path from our base path
+            strcpy(path, basePath);
+            strcat(path, "/");
+            strcat(path, dp->d_name);
+
+            listFilesRecursively(path);
+        }
+    }
+
+    closedir(dir);
+}
+
+void cobaAtbashGagal(char *message)
+{
+    int len = strlen(message);                   // Calculating lenght of the string
+    // printf("len %d\n", len);
+    char cipher[1024];
+    int ascii_char;
+    char result[1024];
+    for(int i=0;i<len;i++)
+    {
+        ascii_char = message[i];                         // Storing ASCII value of alphabet
+        
+        if(ascii_char>='A' && ascii_char<='Z')
+        message[i] = upper_case[ascii_char-65];    // If character is in upper case(minus 65 from its ASCII value to get reversed character)
+        else if(ascii_char>='a' && ascii_char<='z')
+        message[i] = lower_case[ascii_char-97];    // If character is in upper case(minus 97 from its ASCII value to get reversed character)
+        else if(ascii_char == 46) break;
+        else continue;
+        // printf("msg %d\n", message[i]);
+    }
+    
+}
 
 void masukkanLog(char *tingkatan, char *infonih){
     char waktu[100];
@@ -25,6 +104,58 @@ void masukkanLog(char *tingkatan, char *infonih){
     snprintf(log, sizeof log ,"%s::%s::%s\n", tingkatan, time, infonih);
     fputs(log, files);
     fclose(files);
+}
+
+void vignereChiper(){
+     int i,j,k,numstr[100],numkey[100],numcipher[100];
+    char str[100],key[100];
+    printf("Enter a string\n");
+    gets(str);
+    //converting entered string to Capital letters
+    for(i=0,j=0;i<strlen(str);i++){
+        if(str[i]!=' '){
+            str[j]=toupper(str[i]);   
+            j++;
+        }
+    }
+    str[j]='\0';
+    printf("Entered string is : %s \n",str);
+    //Storing string in terms of ascii
+    for(i=0;i<strlen(str);i++){
+        numstr[i]=str[i]-'A';
+    }
+    printf("Enter a key\n");
+    gets(key);
+    //converting entered key to Capital letters
+    for(i=0,j=0;i<strlen(key);i++){
+        if(key[i]!=' '){
+            key[j]=toupper(key[i]);   
+            j++;
+        }
+    }
+    key[j]='\0';
+        //Assigning key to the string
+    for(i=0;i<strlen(str);){
+        for(j=0;(j<strlen(key))&&(i<strlen(str));j++){
+            numkey[i]=key[j]-'A';
+            i++;
+        }
+    }
+    
+    for(i=0;i<strlen(str);i++){
+        numcipher[i]=numstr[i]+numkey[i];
+    }
+    for(i=0;i<strlen(str);i++){
+        if(numcipher[i]>25){
+            numcipher[i]=numcipher[i]-26;
+        }
+    }
+    printf("Vigenere Cipher text is\n");   
+    for(i=0;i<strlen(str);i++){
+        printf("%c",(numcipher[i]+'A')); 
+    }
+        
+    printf("\n");
 }
 
 int cekLength(char *plain, int i){
@@ -196,6 +327,44 @@ void decRot(char *plain){
         kodeUrutan = strlen(atbash) - 1;
         getDec(plain, k, "rot", kodeUrutan);
     }
+}
+
+static int xmp_readdirGagal(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)
+{
+    DIR *dp;
+    struct dirent *de;
+    (void) offset;
+    (void) fi;
+    char fpath[1000];
+    sprintf (fpath,"%s%s",dir_path,path);
+    
+    dp = opendir(fpath);
+
+    if (dp == NULL) return -errno;
+
+    while ((de = readdir(dp)) != NULL) {
+        struct stat st;
+        // printf("INI DE : %s\n", de->d_name);
+        char namafiles[10000];
+        snprintf(namafiles, sizeof namafiles, "%s", de->d_name);
+        if(strstr(namafiles, "AtoZ_")){
+            chdir("/home/ianfelix/Downloads");
+            // system("pwd");
+            char lokasi[10000];
+            snprintf(lokasi, sizeof lokasi, "./%s", de->d_name); 
+            // listFilesRecursively(lokasi);
+            // printf("%s\n",lokasi);
+            // opendir(lokasi);
+        }
+        memset(&st, 0, sizeof(st));
+
+        st.st_ino = de->d_ino;
+        st.st_mode = de->d_type << 12;
+
+        if(filler(buf, de->d_name, &st, 0)) break;
+    }
+    closedir(dp);
+    return 0;
 }
 
 static int xmp_mkdir(const char *path, mode_t mode){
@@ -573,3 +742,4 @@ int main(int argc, char *argv[]){
     umask(0);
     return fuse_main(argc, argv, &xmp_oper, NULL);
 }
+ 
