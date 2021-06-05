@@ -9,7 +9,7 @@
 #include <sys/time.h>
  
 char *dir_path = "/home/ianfelix/Downloads";
-char *log_path = "/home/ianfelix/fs.log";
+char *log_path = "/home/ianfelix/SinSeiFS.log";
 char atbash[1000] = "~!@#$%^&*(~!@#$%^&*()-=_+,./?>)-=_+,./?><;:[]}{\|\<;:[]}{|\0123457890123456789ABCDEFGHIJZYXWVUTSRQABCDEFGHIJKLMNOPQRSTPONMLKJIHGKLMNOPQRSTabcdefghijzyxwvutsrqabcdefghijklmnopqrstponmlkjihgklmnopqrst";
 char rot[1000] = "~!@#$%^&*(~!@#$%^&*()-=_+,./?>)-=_+,./?><;:[]}{\|\<;:[]}{|\0123457890123456789ABCDEFGHIJNOPQRSTUVWABCDEFGHIJKLMNOPQRSTXYZABCDEFGKLMNOPQRSTabcdefghijnopqrstuvwabcdefghijklmnopqrstxyzabcdefgklmnopqrst";
 
