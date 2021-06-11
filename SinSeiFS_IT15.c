@@ -1,15 +1,29 @@
 #define FUSE_USE_VERSION 28
+
 #include <fuse.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <dirent.h>
 #include <errno.h>
 #include <sys/time.h>
- 
-char *dir_path = "/home/ianfelix/Downloads";
-char *log_path = "/home/ianfelix/SinSeiFS.log";
+#include <wait.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <ctype.h>
+#include <time.h>
+
+static const char *dirPath = "/home/ianfelix/Downloads";
+
+char *key = "SISOP";
+char *atoz = "AtoZ_";
+char *rx = "RX_";
+char *aisa = "A_is_a_";
+int x = 0;
+
 char upper_case[]={'Z', 'Y', 'X', 'W', 'V', 'U',
                    'T', 'S', 'R', 'Q', 'P', 'O',
                    'N', 'M', 'L', 'K', 'J', 'I', 
@@ -92,7 +106,7 @@ void cobaAtbashGagal(char *message)
     }
     
 }
-
+char *log_path = "/home/ianfelix/SinSeiFS.log";
 void masukkanLog(char *tingkatan, char *infonih){
     char waktu[100];
     char log[100];
@@ -336,7 +350,7 @@ static int xmp_readdirGagal(const char *path, void *buf, fuse_fill_dir_t filler,
     (void) offset;
     (void) fi;
     char fpath[1000];
-    sprintf (fpath,"%s%s",dir_path,path);
+    sprintf (fpath,"%s%s",dirPath,path);
     
     dp = opendir(fpath);
 
@@ -367,379 +381,885 @@ static int xmp_readdirGagal(const char *path, void *buf, fuse_fill_dir_t filler,
     return 0;
 }
 
-static int xmp_mkdir(const char *path, mode_t mode){
-    int hasil;
-    
-    char newPath[12000];
-    
-    if (strcmp(path, "/") == 0)
-    {
-        path = dir_path;
-        snprintf(newPath, sizeof newPath ,"%s", path);
-    }else{
-        char dinamis[12000];
-        strcpy(dinamis, path);
-        if(strncmp(path, "/RX_", 4) == 0){
-            decRot(dinamis);decAtbash(dinamis);
-        }
-        else if(strncmp(path, "/AtoZ_", 5) == 0){decAtbash(dinamis);}
-        snprintf(newPath, sizeof newPath ,"%s%s", dir_path, dinamis);
+void writeTheLog(char *nama, char *filepath)
+{
+	time_t rawtime;
+	struct tm *timeinfo;
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+ 
+	char infoWriteLog[1000];
+
+	FILE *file;
+	file = fopen("/home/ianfelix/SinSeiFS.log", "a");
+
+	if (strcmp(nama, "RMDIR") == 0 || strcmp(nama, "UNLINK") == 0)
+		sprintf(infoWriteLog, "WARNING::%.2d%.2d%d-%.2d:%.2d:%.2d::%s::%s\n", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, nama, filepath);
+	else
+		sprintf(infoWriteLog, "INFO::%.2d%.2d%d-%.2d:%.2d:%.2d::%s::%s\n", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, nama, filepath);
+
+	fputs(infoWriteLog, file);
+	fclose(file);
+	return;
+}
+
+void writeTheLog2(char *nama, const char *from, const char *to)
+{
+	time_t rawtime;
+	struct tm *timeinfo;
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	char infoWriteLog[1000];
+
+	FILE *file;
+	file = fopen("/home/ianfelix/SinSeiFS.log", "a");
+
+	if (strcmp(nama, "RMDIR") == 0 || strcmp(nama, "UNLINK") == 0)
+		sprintf(infoWriteLog, "WARNING::%.2d%.2d%d-%.2d:%.2d:%.2d::%s::%s::%s\n", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, nama, from, to);
+	else
+		sprintf(infoWriteLog, "INFO::%.2d%.2d%d-%.2d:%.2d:%.2d::%s::%s::%s\n", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, nama, from, to);
+
+	fputs(infoWriteLog, file);
+	fclose(file);
+	return;
+}
+
+int pisahkanExt(char *path){
+	int flag = 0;
+	for(int i=strlen(path)-1; i>=0; i--){
+		if (path[i] == '.'){if(flag == 1) return i; else flag = 1;}
+	}
+	return strlen(path);
+}
+
+int extensionId(char *path){
+	for(int i=strlen(path)-1; i>=0; i--){
+		if (path[i] == '.') return i;
+	}
+	return strlen(path);
+}
+
+int pemisahId(char *path, int hasil){
+	for(int i=0; i<strlen(path); i++){
+		if (path[i] == '/') return i + 1;
+	}
+	return hasil;
+}
+
+void enkripsiMenjadiAtbash(char *path){
+	if (!strcmp(path, ".") || !strcmp(path, "..")) return;
+	int idAkhir = pisahkanExt(path);
+	if(idAkhir == strlen(path)){
+        idAkhir = extensionId(path);
     }
-    
-    hasil = mkdir(newPath, mode);
-    if (hasil == -1) return -errno;
-    
-    char deskripsi[12000];
-    snprintf(deskripsi,sizeof deskripsi ,"MKDIR::%s", newPath);
-    masukkanLog("INFO", deskripsi);
-    
-    return 0;
+	int idAwal = pemisahId(path, 0);
+	
+	for (int i = idAwal; i < idAkhir; i++){
+		if (path[i] != '/' && isalpha(path[i])){
+			char sementara = path[i];
+			if(isupper(path[i])) sementara -= 'A'; else sementara -= 'a'; sementara = 25 - sementara; 
+			if(isupper(path[i])) sementara += 'A'; else sementara += 'a'; path[i] = sementara;
+		}
+	}
+}
+
+void dekripsiMenjadiAtbash(char *path){
+	if (!strcmp(path, ".") || !strcmp(path, "..")) return;
+	int idAkhir = pisahkanExt(path);
+	if(idAkhir == strlen(path)){
+        idAkhir = extensionId(path);
+    }
+	int idAwal = pemisahId(path, idAkhir);
+	
+	for (int i = idAwal; i < idAkhir; i++){
+		if (path[i] != '/' && isalpha(path[i])){
+			char sementara = path[i];
+			if(isupper(path[i])) sementara -= 'A'; else sementara -= 'a'; sementara = 25 - sementara;
+			if(isupper(path[i])) sementara += 'A'; else sementara += 'a'; path[i] = sementara;
+		}
+	}
+}
+
+void enkripsiMenjadiRot13(char *path)
+{
+	if (!strcmp(path, ".") || !strcmp(path, "..")) return;
+	
+	
+	int idAkhir = pisahkanExt(path);
+	int idAwal = pemisahId(path, 0);
+	
+	for (int i = idAwal; i < idAkhir; i++){
+		if (path[i] != '/' && isalpha(path[i])){
+			char sementara = path[i];
+			if(isupper(path[i])) sementara -= 'A'; else sementara -= 'a'; sementara = (sementara + 13) % 26;
+			if(isupper(path[i])) sementara += 'A'; else sementara += 'a';
+			path[i] = sementara;
+		}
+	}
+}
+
+void dekripsiMenjadiRot13(char *path)
+{
+	if (!strcmp(path, ".") || !strcmp(path, "..")) return;
+	
+	
+	int idAkhir = pisahkanExt(path);
+	int idAwal = pemisahId(path, idAkhir);
+	
+	for (int i = idAwal; i < idAkhir; i++){
+		if (path[i] != '/' && isalpha(path[i])){
+			char sementara = path[i];
+			if(isupper(path[i])) sementara -= 'A'; else sementara -= 'a'; sementara = (sementara + 13) % 26;
+			if(isupper(path[i])) sementara += 'A'; else sementara += 'a';
+			path[i] = sementara;
+		}
+	}
+}
+
+void enkripsiMenjadiVigenere(char *path){
+	if (!strcmp(path, ".") || !strcmp(path, "..")) return;
+	
+	
+	int idAkhir = pisahkanExt(path);
+	int idAwal = pemisahId(path, 0);
+	
+	for (int i = idAwal; i < idAkhir; i++){
+		if (path[i] != '/' && isalpha(path[i])){
+			char sementara1 = path[i]; char sementara2 = key[(i-idAwal) % strlen(key)];
+			if(isupper(path[i])){sementara1 -= 'A'; sementara2 -= 'A'; sementara1 = (sementara1 + sementara2) % 26; sementara1 += 'A';}
+			else{ sementara1 -= 'a'; sementara2 = tolower(sementara2) - 'a'; sementara1 = (sementara1 + sementara2) % 26; sementara1 += 'a';}
+			path[i] = sementara1;
+		}
+	}
+}
+
+void desripsiMenjadiVigenere(char *path)
+{
+	if (!strcmp(path, ".") || !strcmp(path, "..")) return;
+	
+	
+	int idAkhir = pisahkanExt(path);
+	int idAwal = pemisahId(path, idAkhir);
+	
+	for (int i = idAwal; i < idAkhir; i++){
+		if (path[i] != '/' && isalpha(path[i])){
+			char sementara1 = path[i];
+			char sementara2 = key[(i-idAwal) % strlen(key)];
+			if(isupper(path[i])){sementara1 -= 'A'; sementara2 -= 'A';sementara1 = (sementara1 - sementara2 + 26) % 26; sementara1 += 'A';}
+			else{sementara1 -= 'a'; sementara2 = tolower(sementara2) - 'a'; sementara1 = (sementara1 - sementara2 + 26) % 26; sementara1 += 'a';}
+			path[i] = sementara1;
+		}
+	}
+}
+
+void lakukanEnkripsi(char *filepath){
+	chdir(filepath);
+	DIR *dp;
+	struct dirent *dir;
+	
+	dp = opendir(".");
+	if(dp == NULL) return;
+	struct stat lol;
+	char dirPath[1000];
+	char filePath[1000];
+	
+    while ((dir = readdir(dp)) != NULL){
+		if (stat(dir->d_name, &lol) < 0);
+		else if (S_ISDIR(lol.st_mode)){
+			if (strcmp(dir->d_name,".") == 0 || strcmp(dir->d_name,"..") == 0) continue;sprintf(dirPath,"%s/%s",filepath, dir->d_name);lakukanEnkripsi(dirPath);
+		}
+		else{
+			sprintf(filePath,"%s/%s",filepath,dir->d_name);
+			FILE *input = fopen(filePath, "r");
+			if (input == NULL) return;
+			int baca_byte, hitung = 0;
+			void *buffer = malloc(1024);
+			while((baca_byte = fread(buffer, 1, 1024, input)) > 0){
+				char newFilePath[1000];
+				sprintf(newFilePath, "%s.%04d", filePath, hitung);
+				hitung++;
+				FILE *keluaranEnc = fopen(newFilePath, "w+");
+				if(keluaranEnc == NULL) return;
+				fwrite(buffer, 1, baca_byte, keluaranEnc);
+				fclose(keluaranEnc);
+				memset(buffer, 0, 1024);
+			}
+			fclose(input);
+			remove(filePath);
+		}
+	}
+    closedir(dp);
+}
+
+void lakukanDekripsi(char *dir){
+	chdir(dir);
+	DIR *dp;
+	struct dirent *de;
+	struct stat lol;
+	dp = opendir(".");
+	if (dp == NULL) return;
+	
+	char dirPath[1000];
+	char filePath[1000];
+	
+	while ((de = readdir(dp)) != NULL){
+		if (stat(de->d_name, &lol) < 0);
+		else if (S_ISDIR(lol.st_mode)){
+			if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) continue;sprintf(dirPath, "%s/%s", dir, de->d_name);lakukanDekripsi(dirPath);
+		}
+		else{
+			sprintf(filePath, "%s/%s", dir, de->d_name);
+			filePath[strlen(filePath) - 5] = '\0';
+			FILE *check = fopen(filePath, "r");
+			if (check != NULL) return;
+			FILE *file = fopen(filePath, "w");
+			int hitung = 0;
+			char keDir[1000];
+			sprintf(keDir, "%s.%04d", filePath, hitung);
+			void *buffer = malloc(1024);
+			while (1){
+				FILE *op = fopen(keDir, "rb");
+				if (op == NULL) break;
+				size_t readSize = fread(buffer, 1, 1024, op);
+				fwrite(buffer, 1, readSize, file);
+				fclose(op);
+				remove(keDir);
+				hitung++;
+				sprintf(keDir, "%s.%04d", filePath, hitung);
+			}
+			free(buffer);
+			fclose(file);
+		}
+	}
+	closedir(dp);
+}
+
+void ambilBiner(char *fname, char *bin, char *lowercase){
+	int idAkhir = extensionId(fname);
+	int idAwal = pemisahId(fname, 0);
+	int i;
+	
+	for(i=idAwal; i<idAkhir; i++){
+		if(isupper(fname[i])){
+			bin[i] = '1';lowercase[i] = fname[i] + 32;
+		}
+		else{
+			bin[i] = '0';lowercase[i] = fname[i];
+		}
+	}
+	bin[idAkhir] = '\0';
+	
+	for(; i<strlen(fname); i++){
+		lowercase[i] = fname[i];
+	}
+	lowercase[i] = '\0';
+}
+
+int bin2dec(char *bin){
+	int sementara = 1, result = 0;
+	for(int i=strlen(bin)-1; i>=0; i--){if(bin[i] == '1') result += sementara; sementara *= 2;}
+	return result;
+}
+
+void encryptBinary(char *filepath){
+	chdir(filepath);
+	DIR *dp;
+	struct dirent *dir;
+	struct stat lol;
+	dp = opendir(".");
+	if(dp == NULL) return;
+	
+	char dirPath[1000];
+	char filePath[1000];
+	char filePathBinary[1000];
+	
+    while ((dir = readdir(dp)) != NULL){
+		if (stat(dir->d_name, &lol) < 0);
+		else if (S_ISDIR(lol.st_mode)){
+			if (strcmp(dir->d_name,".") == 0 || strcmp(dir->d_name,"..") == 0) continue;sprintf(dirPath,"%s/%s",filepath, dir->d_name);encryptBinary(dirPath);
+		}else{
+			sprintf(filePath,"%s/%s",filepath, dir->d_name);
+			char bin[1000], lowercase[1000]; ambilBiner(dir->d_name, bin, lowercase);
+			int dec = bin2dec(bin);
+			sprintf(filePathBinary,"%s/%s.%d",filepath,lowercase,dec); rename(filePath, filePathBinary);
+		}
+	}
+    closedir(dp);
+}
+
+int convertDec(char *ext){
+	int dec = 0, pengali = 1;
+	for(int i=strlen(ext)-1; i>=0; i--){dec += (ext[i]-'0')*pengali;pengali *= 10;}
+	return dec;
+}
+
+void dec2bin(int dec, char *bin, int len){
+	int idx = 0;
+	while(dec){
+		if(dec & 1) bin[idx] = '1';
+		else bin[idx] = '0';idx++;
+		dec /= 2;
+	}
+	while(idx < len){
+		bin[idx] = '0'; idx++;
+	}
+	bin[idx] = '\0';
+	
+	for(int i=0; i<idx/2; i++){
+		char sementara = bin[i];bin[i] = bin[idx-1-i];bin[idx-1-i] = sementara;
+	}
+}
+
+void getDecimal(char *fname, char *bin, char *normalcase){
+	int idAkhir = extensionId(fname);
+	int idAwal = pemisahId(fname, 0);
+	int i;
+	
+	for(i=idAwal; i<idAkhir; i++){
+		if(bin[i-idAwal] == '1') normalcase[i-idAwal] = fname[i] - 32;
+		else normalcase[i-idAwal] = fname[i];
+	}
+	
+	for(; i<strlen(fname); i++){
+		normalcase[i-idAwal] = fname[i];
+	}
+	normalcase[i-idAwal] = '\0';
+}
+
+void decryptBinary(char *filepath){
+	chdir(filepath);
+	DIR *dp;
+	struct dirent *dir;
+	struct stat lol;
+	dp = opendir(".");
+	if(dp == NULL) return;
+	
+	char dirPath[1000];
+	char filePath[1000];
+	char filePathDecimal[1000];
+	
+    while ((dir = readdir(dp)) != NULL){
+		if (stat(dir->d_name, &lol) < 0);
+		else if (S_ISDIR(lol.st_mode)){
+			if (strcmp(dir->d_name,".") == 0 || strcmp(dir->d_name,"..") == 0) continue;sprintf(dirPath,"%s/%s",filepath, dir->d_name);decryptBinary(dirPath);
+		}
+		else{
+			sprintf(filePath,"%s/%s",filepath, dir->d_name);
+			char fname[1000], bin[1000], normalcase[1000], clearPath[1000];
+			
+			strcpy(fname, dir->d_name);
+			char *ext = strrchr(fname, '.');
+			int dec = convertDec(ext+1);
+			for(int i=0; i<strlen(fname)-strlen(ext); i++) clearPath[i] = fname[i];
+			
+			char *ext2 = strrchr(clearPath, '.');
+			dec2bin(dec, bin, strlen(clearPath)-strlen(ext2));getDecimal(clearPath, bin, normalcase);sprintf(filePathDecimal,"%s/%s",filepath,normalcase);rename(filePath, filePathDecimal);
+		}
+	}
+    closedir(dp);
 }
 
 static int xmp_getattr(const char *path, struct stat *stbuf){
-    int hasil;
-    char sementara[12000];
-    
-    strcpy(sementara, path);
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
 
-    if(strncmp(path, "/RX_", 4) == 0){
-        decRot(sementara);decAtbash(sementara);
-    }
-    else if(strncmp(path, "/AtoZ_", 5) == 0){decAtbash(sementara);}
-    
-    char newPath[12000];
-    snprintf(newPath, sizeof newPath ,"%s%s", dir_path, sementara);
-    
-    hasil = lstat(newPath, stbuf);
-    
-    if(hasil == -1) return -errno;
-    return 0;
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	result = lstat(filepath, stbuf);
+	if (result == -1) return -errno;
+	return 0;
 }
 
 static int xmp_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi){
-    char newPath[12000];
-    char dinamis[12000];
-    
-    if (strcmp(path, "/") == 0){
-        path = dir_path;
-        snprintf(newPath, sizeof newPath ,"%s", path);
-    }else{
-        strcpy(dinamis, path);
-        if(strncmp(path, "/RX_", 4) == 0){
-            decRot(dinamis);decAtbash(dinamis);
-        }
-        else if(strncmp(path, "/AtoZ_", 5) == 0){decAtbash(dinamis);}
-        snprintf(newPath, sizeof newPath ,"%s%s", dir_path, dinamis);
-    }
- 
-    int success = 0;
-    
-    DIR *dp;
-    struct dirent *de;
-    
-    (void)offset;
-    (void)fi;
-    
-    dp = opendir(newPath);
- 
-    if(dp == NULL) return -errno;
-    
-    while ((de = readdir(dp)) != NULL){
-    if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) continue;
-    
-    struct stat st;
-    memset(&st, 0, sizeof(st));
-    st.st_ino = de->d_ino;
-    st.st_mode = de->d_type << 12;
-    
-    char sementara[1000];
-    strcpy(sementara, de->d_name);
-    if (strncmp(path, "/AtoZ_", 5) == 0){encAtbash(sementara);
-    }else if(strncmp(path, "/RX_", 4) == 0){encAtbash(sementara);rot13(sementara);}
-    success = (filler(buf, sementara, &st, 0));
-    if (success != 0) break;}
-    closedir(dp);
-    return 0;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	if (x != 24) x++;
+	else writeTheLog("READDIR", filepath);
+
+	int result = 0;
+	DIR *dp;
+	struct dirent *de;
+
+	(void)offset;
+	(void)fi;
+
+	dp = opendir(filepath);
+	if (dp == NULL) return -errno;
+
+	while ((de = readdir(dp)) != NULL){
+		if(strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) continue;
+
+		struct stat st;
+		memset(&st, 0, sizeof(st));
+		st.st_ino = de->d_ino;
+		st.st_mode = de->d_type << 12;
+
+		if (a != NULL) enkripsiMenjadiAtbash(de->d_name);
+		if (b != NULL){enkripsiMenjadiAtbash(de->d_name);enkripsiMenjadiRot13(de->d_name);}
+
+		result = (filler(buf, de->d_name, &st, 0));
+		if (result != 0) break;
+	}
+
+	closedir(dp);
+	return 0;
 }
 
-static int xmp_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
+static int xmp_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi){
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b); dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath; sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	int result = 0;
+	int fd = 0;
+
+	(void)fi;
+	writeTheLog("READ", filepath);
+
+	fd = open(filepath, O_RDONLY);
+	if (fd == -1) return -errno;
+
+	result = pread(fd, buf, size, offset);
+	if (result == -1) result = -errno;
+
+	close(fd);
+	return result;
+}
+
+static int xmp_mkdir(const char *path, mode_t mode){
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	result = mkdir(filepath, mode);
+	writeTheLog("MKDIR", filepath);
+
+	if (result == -1) return -errno;
+	return 0;
+}
+
+static int xmp_rmdir(const char *path)
 {
-    char newPath[12000];
-    
-    if (strcmp(path, "/") == 0){
-        path = dir_path;
-        snprintf(newPath, sizeof newPath ,"%s", path);
-    }else{
-        char dinamis[1000];
-        strcpy(dinamis, path);
-        if(strncmp(path, "/RX_", 4) == 0){
-            decRot(dinamis);decAtbash(dinamis);
-        }
-        else if(strncmp(path, "/AtoZ_", 5) == 0){decAtbash(dinamis);}
-        snprintf(newPath, sizeof newPath ,"%s%s", dir_path, dinamis);
-    }
-    
-    int ifSuccess = 0;
-    int filDir = 0;
-    
-    (void)fi;
-    
-    filDir = open(newPath, O_RDONLY);
-    if (filDir == -1) return -errno;
-    ifSuccess = pread(filDir, buf, size, offset);
-    if (ifSuccess == -1) ifSuccess = -errno;
-    close(filDir);
-    
-    return ifSuccess;
-}
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){
+		dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);
+	}
 
-static int xmp_mknod(const char *path, mode_t mode, dev_t rdev){
-    int ifSuccess;
-    
-    char newPath[12000];
-    
-    if (strcmp(path, "/") == 0){
-        path = dir_path;
-        snprintf(newPath, sizeof newPath ,"%s", path);
-    }else{
-        char dinamis[1000];
-        strcpy(dinamis, path);
-        
-        if(strncmp(path, "/RX_", 4) == 0){
-            decRot(dinamis);decAtbash(dinamis);
-        }
-        else if(strncmp(path, "/AtoZ_", 5) == 0){decAtbash(dinamis);}
-        
-        snprintf(newPath, sizeof newPath ,"%s%s", dir_path, dinamis);
-    }
- 
-    if (S_ISREG(mode)){
-        ifSuccess = open(newPath, O_CREAT | O_EXCL | O_WRONLY, mode);
-        if(ifSuccess >= 0)
-            ifSuccess = close(ifSuccess);
-        }else if (S_ISFIFO(mode)) ifSuccess = mkfifo(newPath, mode);
-        else ifSuccess = mknod(newPath, mode, rdev);
-    
-    if (ifSuccess == -1) return -errno;
-    
-    char deskripsi[12000];
-    snprintf(deskripsi,sizeof deskripsi ,"CREATE::%s", newPath);
-    masukkanLog("INFO", deskripsi);
-    
-    return 0;
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	result = rmdir(filepath);
+	writeTheLog("RMDIR", filepath);
+
+	if (result == -1) return -errno;
+	return 0;
 }
 
 static int xmp_rename(const char *from, const char *to){
-    int hasil;
-    
-    char lokasiSebelum[12000];
-    if (strcmp(from, "/") == 0){
-        from = dir_path;
-        snprintf(lokasiSebelum, sizeof lokasiSebelum ,"%s", from);
-    }else{
-        char dinamis[12000];
-        strcpy(dinamis, from);
-        
-        if(strncmp(from, "/RX_", 4) == 0){
-            decRot(dinamis);decAtbash(dinamis);
-        }
-        else if(strncmp(from, "/AtoZ_", 5) == 0){decAtbash(dinamis);}
-        
-        snprintf(lokasiSebelum, sizeof lokasiSebelum ,"%s%s", dir_path, dinamis);
-    }
-    
-    char lokasiSesudah[1000];
-    if (strcmp(to, "/") == 0){
-        to = dir_path;
-        snprintf(lokasiSesudah, sizeof lokasiSesudah ,"%s", to);
-    }else{
-        char dinamis[1000];
-        strcpy(dinamis, to);
-    
-        if(strncmp(to, "/RX_", 4) == 0){
-            decRot(dinamis);decAtbash(dinamis);
-        }
-        else if(strncmp(to, "/AtoZ_", 5) == 0){decAtbash(dinamis);}
-    
-        snprintf(lokasiSesudah, sizeof lokasiSesudah ,"%s%s", dir_path, dinamis);
-    }
-    
-    hasil = rename(lokasiSebelum, lokasiSesudah);
-    if (hasil == -1) return -errno;
-    
-    char deskripsi[12000];
-    snprintf(deskripsi,sizeof deskripsi ,"RENAME::%s::%s", lokasiSebelum, lokasiSesudah);
-    masukkanLog("INFO", deskripsi);
-    
-    return 0;
-}
+	int result;
+	char dariDir[1000], keDir[1000];
+	
+	char *a = strstr(to, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(from, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+	
+	char *c = strstr(to, rx);
+	if (c != NULL){dekripsiMenjadiRot13(c);dekripsiMenjadiAtbash(c);}
 
-static int xmp_unlink(const char *path){
-    int hasil;
-    
-    char newPath[12000];
-    
-    if (strcmp(path, "/") == 0){
-        path = dir_path;
-        snprintf(newPath, sizeof newPath ,"%s", path);
-    }else{
-        char dinamis[12000];
-        strcpy(dinamis, path);
+	sprintf(dariDir, "%s%s", dirPath, from);
+	sprintf(keDir, "%s%s", dirPath, to);
 
-        if(strncmp(path, "/RX_", 4) == 0){
-            decRot(dinamis);decAtbash(dinamis);
-        }
-        else if(strncmp(path, "/AtoZ_", 5) == 0){decAtbash(dinamis);}
-    
-        snprintf(newPath,sizeof newPath ,"%s%s", dir_path, dinamis);
-    }
-    
-    hasil = unlink(newPath);
-    if (hasil == -1) return -errno;
-    
-    char deskripsi[12000];
-    snprintf(deskripsi, sizeof deskripsi ,"REMOVE::%s", newPath);
-    masukkanLog("WARNING", deskripsi);
-    return 0;
-}
+	result = rename(dariDir, keDir);
+	if (result == -1) return -errno;
 
-static int xmp_rmdir(const char *path){
-    int hasil;
-    
-    char newPath[12000];
-    
-    if (strcmp(path, "/") == 0){
-        path = dir_path;
-        snprintf(newPath, sizeof newPath ,"%s", path);
-    }else{
-        char dinamis[1000];
-        strcpy(dinamis, path);
-        
-        if(strncmp(path, "/RX_", 4) == 0){
-            decRot(dinamis);decAtbash(dinamis);
-        }
-        else if(strncmp(path, "/AtoZ_", 5) == 0){decAtbash(dinamis);}
-    
-        snprintf(newPath, sizeof newPath ,"%s%s", dir_path, dinamis);
-    }
-    hasil = rmdir(newPath);
-    if (hasil == -1)
-    return -errno;
-    
-    char deskripsi[12000];
-    snprintf(deskripsi, sizeof deskripsi ,"RMDIR::%s", newPath);
-    masukkanLog("WARNING", deskripsi);
-    
-    return 0;
-}
+	writeTheLog2("RENAME", dariDir, keDir);
+	
+	if (c != NULL){lakukanEnkripsi(keDir);writeTheLog2("ENCRYPT2", from, to);}
+	if (b != NULL && c == NULL){lakukanDekripsi(keDir);writeTheLog2("DECRYPT2", from, to);}
+	if (strstr(to, aisa) != NULL){encryptBinary(keDir);writeTheLog2("ENCRYPT3", from, to);}
+	if (strstr(from, aisa) != NULL && strstr(to, aisa) == NULL){decryptBinary(keDir);writeTheLog2("DECRYPT3", from, to);}
 
-static int xmp_open(const char *path, struct fuse_file_info *fi)
-{
-    int hasil;
-    
-    char newPath[12000];
-    
-    if (strcmp(path, "/") == 0){
-        path = dir_path;
-        snprintf(newPath,sizeof newPath ,"%s", path);
-    }else{
-        char dinamis[1000];
-        strcpy(dinamis, path);
-
-        if(strncmp(path, "/RX_", 4) == 0){
-            decRot(dinamis);decAtbash(dinamis);
-        }
-        else if(strncmp(path, "/AtoZ_", 5) == 0){decAtbash(dinamis);}
-        
-        snprintf(newPath, sizeof newPath ,"%s%s", dir_path, dinamis);
-    }
-    
-    hasil = open(newPath, fi->flags);
-    if (hasil == -1) return -errno;
-    
-    close(hasil);
-    return 0;
+	return 0;
 }
 
 static int xmp_truncate(const char *path, off_t size){
-    int hasil;
-    
-    char newPath[12000];
-    
-    if (strcmp(path, "/") == 0){
-        path = dir_path;
-        snprintf(newPath, sizeof newPath ,"%s", path);
-    }else{
-        char dinamis[1000];
-        strcpy(dinamis, path);
-        
-        if(strncmp(path, "/RX_", 4) == 0){
-            decRot(dinamis);decAtbash(dinamis);
-        }
-        else if(strncmp(path, "/AtoZ_", 5) == 0){decAtbash(dinamis);}
-        
-        snprintf(newPath, sizeof newPath ,"%s%s", dir_path, dinamis);
-    }
-    
-    hasil = truncate(newPath, size);
-    if (hasil == -1) return -errno;
-    
-    return 0;
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	writeTheLog("TRUNC", filepath);
+	result = truncate(filepath, size);
+	
+	if (result == -1) return -errno;
+	return 0;
 }
 
 static int xmp_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi){
-    char newPath[12000];
-    
-    if (strcmp(path, "/") == 0){
-        path = dir_path;
-        snprintf(newPath,sizeof newPath ,"%s", path);
-    }else{
-        char dinamis[12000];
-        strcpy(dinamis, path);
+	int fd;
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
 
-        if(strncmp(path, "/RX_", 4) == 0){
-            decRot(dinamis);decAtbash(dinamis);
-        }
-        else if(strncmp(path, "/AtoZ_", 5) == 0){decAtbash(dinamis);}
-        
-        snprintf(newPath, sizeof newPath ,"%s%s", dir_path, dinamis);
-    }
-    
-    int fileDir;
-    int hasil;
-    
-    (void) fi;
-    fileDir = open(newPath, O_WRONLY);
-    if (fileDir == -1) return -errno;
-    
-    hasil = pwrite(fileDir, buf, size, offset);
-    if (hasil == -1) hasil = -errno;
-    
-    close(fileDir);
-    
-    char deskripsi[12000];
-    snprintf(deskripsi,sizeof deskripsi ,"WRITE::%s", newPath);
-    masukkanLog("INFO", deskripsi);
-    
-    return hasil;
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	(void)fi;
+	writeTheLog("WRITE", filepath);
+
+	fd = open(filepath, O_WRONLY);
+	if (fd == -1) return -errno;
+
+	result = pwrite(fd, buf, size, offset);
+	if (result == -1) result = -errno;
+
+	close(fd);
+	return result;
+}
+
+static int xmp_create(const char *path, mode_t mode, struct fuse_file_info *fi){
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	(void)fi;
+	writeTheLog("CREATE", filepath);
+	
+	result = creat(filepath, mode);	
+	if (result == -1) return -errno;
+
+	close(result);
+	return 0;
+}
+
+static int xmp_utimens(const char *path, const struct timespec ts[2])
+{
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	struct timeval tv[2];
+
+	tv[0].tv_sec = ts[0].tv_sec;
+	tv[0].tv_usec = ts[0].tv_nsec / 1000;
+	tv[1].tv_sec = ts[1].tv_sec;
+	tv[1].tv_usec = ts[1].tv_nsec / 1000;
+
+	result = utimes(filepath, tv);
+	if (result == -1) return -errno;
+	return 0;
+}
+
+static int xmp_access(const char *path, int mask){
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	result = access(filepath, mask);
+	if (result == -1) return -errno;
+	return 0;
+}
+
+static int xmp_open(const char *path, struct fuse_file_info *fi){
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	result = open(filepath, fi->flags);
+
+	writeTheLog("OPEN", filepath);
+	if (result == -1) return -errno;
+
+	close(result);
+	return 0;
+}
+
+static int xmp_unlink(const char *path)
+{
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	result = unlink(filepath);
+	writeTheLog("UNLINK", filepath);
+
+	if (result == -1) return -errno;
+	return 0;
+}
+
+static int xmp_readlink(const char *path, char *buf, size_t size)
+{
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	result = readlink(filepath, buf, size - 1);
+	writeTheLog("READLINK", filepath);
+	if (result == -1) return -errno;
+
+	buf[result] = '\0';
+	return 0;
+}
+
+static int xmp_mknod(const char *path, mode_t mode, dev_t rdev){
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	writeTheLog("MKNOD", filepath);
+	
+	if (S_ISREG(mode)){
+		result = open(filepath, O_CREAT | O_EXCL | O_WRONLY, mode);
+		if (result >= 0) result = close(result);
+	}else if (S_ISFIFO(mode)) result = mkfifo(filepath, mode);
+	else result = mknod(filepath, mode, rdev);
+	
+	if (result == -1) return -errno;
+	return 0;
+}
+
+static int xmp_symlink(const char *from, const char *to){
+	int result;
+	char dariDir[1000], keDir[1000];
+	
+	char *a = strstr(to, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(from, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+	
+	char *c = strstr(to, rx);
+	if (c != NULL){dekripsiMenjadiRot13(c);dekripsiMenjadiAtbash(c);}
+
+	sprintf(dariDir, "%s%s", dirPath, from);
+	sprintf(keDir, "%s%s", dirPath, to);
+
+	result = symlink(dariDir, keDir);
+	writeTheLog2("SYMLINK", dariDir, keDir);
+	
+	if (result == -1) return -errno;
+	return 0;
+}
+
+static int xmp_link(const char *from, const char *to)
+{
+	int result;
+	char dariDir[1000], keDir[1000];
+	
+	char *a = strstr(to, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(from, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+	
+	char *c = strstr(to, rx);
+	if (c != NULL){dekripsiMenjadiRot13(c);dekripsiMenjadiAtbash(c);}
+
+	sprintf(dariDir, "%s%s", dirPath, from);
+	sprintf(keDir, "%s%s", dirPath, to);
+
+	result = link(dariDir, keDir);
+	writeTheLog2("LINK", dariDir, keDir);
+
+	if (result == -1) return -errno;
+	return 0;
+}
+
+static int xmp_chmod(const char *path, mode_t mode){
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	result = chmod(filepath, mode);
+	writeTheLog("CHMOD", filepath);
+
+	if (result == -1) return -errno;
+	return 0;
+}
+
+static int xmp_chown(const char *path, uid_t uid, gid_t gid)
+{
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	result = lchown(filepath, uid, gid);
+	writeTheLog("CHOWN", filepath);
+	
+	if (result == -1) return -errno;
+	return 0;
+}
+
+static int xmp_statfs(const char *path, struct statvfs *stbuf)
+{
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	char *b = strstr(path, rx);
+	if (b != NULL){dekripsiMenjadiRot13(b);dekripsiMenjadiAtbash(b);}
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	result = statvfs(filepath, stbuf);
+	writeTheLog("STATFS", filepath);
+	
+	if (result == -1) return -errno;
+	return 0;
 }
 
 static struct fuse_operations xmp_oper = {
-    .getattr  = xmp_getattr,
-    .read     = xmp_read,
-    .readdir  = xmp_readdir,
-    .unlink   = xmp_unlink,
-    .rmdir    = xmp_rmdir,
-    .rename   = xmp_rename,
-    .truncate = xmp_truncate,
-    .mknod    = xmp_mknod,
-    .open     = xmp_open,
-    .write    = xmp_write,
-    .mkdir    = xmp_mkdir,
+	.getattr = xmp_getattr,
+	.readdir = xmp_readdir,
+	.read = xmp_read,
+	.mkdir = xmp_mkdir,
+	.rmdir = xmp_rmdir,
+	.rename = xmp_rename,
+	.truncate = xmp_truncate,
+	.write = xmp_write,
+	.create = xmp_create,
+	.utimens = xmp_utimens,
+	.access = xmp_access,
+	.open = xmp_open,
+	.unlink = xmp_unlink,
+	.readlink = xmp_readlink,
+	.mknod = xmp_mknod,
+	.symlink = xmp_symlink,
+	.link = xmp_link,
+	.chmod = xmp_chmod,
+	.chown = xmp_chown,
+	.statfs = xmp_statfs,
 };
- 
-int main(int argc, char *argv[]){
-    umask(0);
-    return fuse_main(argc, argv, &xmp_oper, NULL);
+
+int main(int argc, char *argv[])
+{
+	umask(0);
+	return fuse_main(argc, argv, &xmp_oper, NULL);
 }
- 
