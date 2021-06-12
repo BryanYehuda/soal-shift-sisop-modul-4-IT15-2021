@@ -5,3 +5,33 @@ Pada soal ini kita diminta untuk melakukan enkripsi maupun dekripsi nama file da
 - slash_id : Mengembalikan index slash
 - ext_id : Mengembalikan index file extension
 - split_ext_id : Mengembalikan index file extension pada file yang displit
+
+``` 
+int split_ext_id(char *path)
+{
+	int ada = 0;
+	for(int i=strlen(path)-1; i>=0; i--){
+		if (path[i] == '.'){
+			if(ada == 1) return i;
+			else ada = 1;
+		}
+	}
+	return strlen(path);
+}
+
+int ext_id(char *path)
+{
+	for(int i=strlen(path)-1; i>=0; i--){
+		if (path[i] == '.') return i;
+	}
+	return strlen(path);
+}
+
+int slash_id(char *path, int mentok)
+{
+	for(int i=0; i<strlen(path); i++){
+		if (path[i] == '/') return i + 1;
+	}
+	return mentok;
+}
+```
