@@ -6,7 +6,7 @@ Pada soal ini kita diminta untuk melakukan enkripsi maupun dekripsi nama file da
 - ext_id : Mengembalikan index file extension
 - split_ext_id : Mengembalikan index file extension pada file yang displit
 
-``` 
+```c 
 int split_ext_id(char *path)
 {
 	int ada = 0;
