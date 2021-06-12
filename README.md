@@ -35,3 +35,65 @@ int slash_id(char *path, int mentok)
 	return mentok;
 }
 ```
+
+Untuk melakukan enkripsi dan dekripsi menggunakan Atbash cipher akan dibuat fungsi tersendiri.
+
+```c
+void encryptAtbash(char *path)
+{
+	if (!strcmp(path, ".") || !strcmp(path, "..")) return;
+	
+	printf("encrypt path Atbash: %s\n", path);
+	
+	int endid = split_ext_id(path);
+	if(endid == strlen(path)) endid = ext_id(path);
+	int startid = slash_id(path, 0);
+	
+	for (int i = startid; i < endid; i++){
+		if (path[i] != '/' && isalpha(path[i])){
+			char tmp = path[i];
+			if(isupper(path[i])) tmp -= 'A';
+			else tmp -= 'a';
+			tmp = 25 - tmp; //Atbash cipher
+			if(isupper(path[i])) tmp += 'A';
+			else tmp += 'a';
+			path[i] = tmp;
+		}
+	}
+}
+
+void decryptAtbash(char *path)
+{
+	if (!strcmp(path, ".") || !strcmp(path, "..")) return;
+	
+	printf("decrypt path Atbash: %s\n", path);
+	
+	int endid = split_ext_id(path);
+	if(endid == strlen(path)) endid = ext_id(path);
+	int startid = slash_id(path, endid);
+	
+	for (int i = startid; i < endid; i++){
+		if (path[i] != '/' && isalpha(path[i])){
+			char tmp = path[i];
+			if(isupper(path[i])) tmp -= 'A';
+			else tmp -= 'a';
+			tmp = 25 - tmp; //Atbash cipher
+			if(isupper(path[i])) tmp += 'A';
+			else tmp += 'a';
+			path[i] = tmp;
+		}
+	}
+}
+```
+Pemanggilan fungsi dekripsi dilakukan pada tiap utility functions getattr, mkdir, rename, rmdir, create, dan fungsi-fungsi lain yang menurut kami esensial dalam proses sinkronisasi FUSE dan mount folder. Fungsi dekripsi dan enkripsi dilakukan di utility function readdir karena FUSE akan melakukan dekripsi di mount folder lalu enkripsi di FUSE saat readdir. Pemanggilannya dilakukan dengan pengecekan apakah string AtoZ_ terdapat di string path di masing-masing utility function dengan menggunakan fungsi strstr(). Jika ya, maka fungsi enkripsi dan dekripsi akan dipanggil untuk string tersebut dengan AtoZ_ sebagai starting point string yang diteruskan. Untuk pencatatan log akan dijelaskan pada soal nomor 4.
+
+## Hasil run
+- Kondisi awal
+![121061825-8a37f900-c7ee-11eb-9924-65a0bf4f5102](https://user-images.githubusercontent.com/71550384/121785379-b8994800-cbe3-11eb-9bd6-5e513de296e2.png)
+
+- Setelah di enkripsi
+![121061746-6f658480-c7ee-11eb-86a9-8d875f998fb4](https://user-images.githubusercontent.com/71550384/121785397-c8189100-cbe3-11eb-8fb0-5379845347b4.png)
+
+- Setelah di dekripsi
+![121061825-8a37f900-c7ee-11eb-9924-65a0bf4f5102 (1)](https://user-images.githubusercontent.com/71550384/121785410-d5ce1680-cbe3-11eb-8e32-f64b1ea15f3d.png)
+
