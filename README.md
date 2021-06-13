@@ -1,7 +1,7 @@
 # soal-shift-sisop-modul-4-IT15-2021
 
 # Soal 1
-- Pada soal ini kita diminta untuk melakukan enkripsi maupun dekripsi nama file dan folder dengan Atbash cipher. Untuk mendapatkan nama file dan folder akan dilakukan looping untuk mengecek dimana posisi awal berupa slash (/) dan posisi akhir berupa titik (.), sebagai contoh pada path AtoZ_folder/DATA_PENTING/kucinglucu123.jpg yang akan diolah adalah DATA_PENTING/kucinglucu123 sehingga menjadi WZGZ_KVMGRMT/pfxrmtofxf123 sedangkan karakter yang lainnya tidak berubah dan menghasilkan path akhir AtoZ_folder/WZGZ_KVMGRMT/pfxrmtofxf123.jpg. Maka kita butuh 3 fungsi untuk mendapatkan index penanda awal dan akhir enkripsi dan dekripsi:
+Pada bagian ini kami diminta untuk melakukan enkripsi maupun dekripsi terhadap nama file dan nama folder menggunakan Atbash cipher. Untuk mendapatkan nama file dan nama folder yang diinginkan, kelompok kami melakukan looping untuk melakukan pengecekkan posisi awal berupa slash (/) dan posisi akhir berupa titik (.). Disini kami menerapkan 3 fungsi untuk mendapatkan index awal berupa slash (/) dan berupa titik (.) enkripsi dan dekripsi:  
 - slash_id : Mengembalikan index slash
 - ext_id : Mengembalikan index file extension
 - split_ext_id : Mengembalikan index file extension pada file yang displit
@@ -36,7 +36,7 @@ int slash_id(char *path, int mentok)
 }
 ```
 
-- Untuk melakukan enkripsi dan dekripsi menggunakan Atbash cipher akan dibuat fungsi tersendiri.
+- Untuk melakukan enkripsi dan dekripsi dengan Atbash cipher akan dibuat fungsi berikut ini:
 
 ```c
 void encryptAtbash(char *path)
@@ -85,7 +85,7 @@ void decryptAtbash(char *path)
 	}
 }
 ```
-- Pemanggilan fungsi dekripsi dilakukan pada tiap utility functions getattr, mkdir, rename, rmdir, create, dan fungsi-fungsi lain yang menurut kami esensial dalam proses sinkronisasi FUSE dan mount folder. Fungsi dekripsi dan enkripsi dilakukan di utility function readdir karena FUSE akan melakukan dekripsi di mount folder lalu enkripsi di FUSE saat readdir. Pemanggilannya dilakukan dengan pengecekan apakah string AtoZ_ terdapat di string path di masing-masing utility function dengan menggunakan fungsi strstr(). Jika ya, maka fungsi enkripsi dan dekripsi akan dipanggil untuk string tersebut dengan AtoZ_ sebagai starting point string yang diteruskan. Untuk pencatatan log akan dijelaskan pada soal nomor 4.
+- Pemanggilan fungsi dekripsi dilakukan pada tiap utility functions seperti getattr, mkdir, rename, rmdir, create, dan fungsi-fungsi lain yang menurut kelompok kami sering digunakan dalam proses sinkronisasi FUSE dan mount folder. Fungsi dekripsi dan enkripsi akan dilakukan di utility function readdir karena FUSE akan melakukan dekripsi di mount folder lalu dilakukan enkripsi di FUSE saat readdir. Pemanggilannya dilakukan dengan pengecekan apakah string AtoZ_ terdapat di string path di masing-masing utility function dengan menggunakan fungsi strstr(). Jika terdeteksi ada string AtoZ_, maka fungsi enkripsi dan dekripsi akan dipanggil untuk string tersebut dengan AtoZ_ sebagai starting point string yang diteruskan. Untuk pencatatan hasil running log akan dijelaskan pada bagian nomor 4.
 
 ## Hasil run
 - Kondisi awal
@@ -102,8 +102,8 @@ void decryptAtbash(char *path)
 - Terdapat kesalahan saat enkripsi dan dekripsi pada fungsi readdir sehingga file tidak tertampil pada FUSE.
 
 # Soal 2
-- Pada utility functions RENAME dilakukan pengecekan apakah direktori direname dengan menambahkan RX_ atau menghilangkan RX_ dengan fungsi strstr().
-dalam soal ini kita akan mengecek apakah sebuah path terdapat string RX_ jika iya maka akan dienkripsi file file yang ada didalamnya. Disini kami menggunakan atbash dan rot13 cipher sesuai perintah soal. Dimana atbash sudah dijelaskan pada soal 1. Selanjutnya sebuah file yang sudah terenkripsi dengan atbash akan di enkripsi dengan rot13. Begitu juga untuk melakukan dekripsi pada pencarian path aslinya. kami perlu menggabungkan dua atbash dan rot13 cipher tadi, namun karena keduanya masih symetric cipher jadi tidak perlu membuat fungsi decode baru.
+- Pada utility functions RENAME akan kami lakukan pengecekan apakah direktori dilakukan rename dengan menambahkan RX_ ataupun menghilangkan RX_ dengan fungsi strstr().
+Kemudian kami akan melakukan pengecekkan apakah di dalam path tersebut terdapat string RX_. Jika ditemukan terdapat string RX_ maka akan dienkripsi file file yang ada di dalam direktorinya. Disini kelompok kami menggunakan atbash dan rot13 cipher sesuai perintah di dalam soal, dimana untuk penggunaan atbash sudah dijelaskan pada bagian 1. Selanjutnya  file tadi yang sudah terenkripsi dengan atbash akan dilakukan enkripsi lebih lanjut dengan rot13. Begitu juga dengan fungsi dekripsi pada pencarian path aslinya. Kelompok kami perlu melakukan dekripsi menggunakan atbash dan rot13 cipher tadi.  
 
 ```c
 static int xmp_rename(const char *from, const char *to)
@@ -149,7 +149,7 @@ static int xmp_rename(const char *from, const char *to)
 	return 0;
 }
 ```
-- Jika terdeteksi RX_ pada path tujuan berarti direktori direname dengan menambahkan RX_ dan dilanjutkan dengan memecahkan file pada fungsi enkripsi2.
+- Jika terdeteksi adanya string RX_ pada path tujuan berarti direktori direname dengan menambahkan RX_ dan dilanjutkan dengan melakukan pemecahan file pada fungsi enkripsi2.
 ```c
 void enkripsi2(char *fpath)
 {
@@ -198,7 +198,7 @@ void enkripsi2(char *fpath)
 }
 ```
 
-- Jika terdeteksi RX_ pada path asal dan tidak terdeteksi RX_ pada path tujuan berarti direktori direname dengan menghilangkan RX_ dan dilanjutkan dengan menggabungkan file pada fungsi dekripsi2.
+- Jika terdeteksi string RX_ pada path asal dan tidak terdeteksi string RX_ pada path tujuan berarti direktori direname dengan menghilangkan RX_ sehingga akan dilanjutkan dengan menggabungkan file pada fungsi dekripsi2.
 ```c
 void dekripsi2(char *dir)
 {
@@ -247,7 +247,7 @@ void dekripsi2(char *dir)
 }
 ```
 
-- Untuk melakukan enkripsi dan dekripsi menggunakan ROT13 cipher akan dibuat fungsi tersendiri.
+- Untuk melakukan enkripsi dan dekripsi menggunakan ROT13 cipher akan dilakukan oleh fungsi berikut:
 ```c
 void encryptRot13(char *path)
 {
@@ -293,7 +293,7 @@ void decryptRot13(char *path)
 	}
 }
 ```
-- Pemanggilan fungsi dekripsi dilakukan pada tiap utility functions getattr, mkdir, rename, rmdir, create, dan fungsi-fungsi lain yang menurut kami esensial dalam proses sinkronisasi FUSE dan mount folder. Fungsi dekripsi dan enkripsi dilakukan di utility function readdir karena FUSE akan melakukan dekripsi di mount folder lalu enkripsi di FUSE saat readdir. Pemanggilannya dilakukan dengan pengecekan apakah string RX_ terdapat di string path di masing-masing utility function dengan menggunakan fungsi strstr(). Jika ya, maka fungsi enkripsi dan dekripsi akan dipanggil untuk string tersebut dengan RX_ sebagai starting point string yang diteruskan. Untuk pencatatan log akan dijelaskan pada soal nomor 4.
+- Pemanggilan fungsi dekripsi dilakukan pada tiap utility functions seperti getattr, mkdir, rename, rmdir, create, dan fungsi-fungsi lain yang menurut kelompok kami sering digunakan dalam proses sinkronisasi FUSE dan mount folder. Fungsi dekripsi dan enkripsi dilakukan di utility function readdir karena FUSE akan melakukan dekripsi di mount folder lalu enkripsi di FUSE saat readdir. Pemanggilannya dilakukan dengan melakukan pengecekan apakah string RX_ terdapat di string path di masing-masing utility function dengan menggunakan fungsi strstr(). Jika ditemukan adanya string RX_, maka fungsi enkripsi dan dekripsi akan dipanggil untuk string tersebut dengan RX_ sebagai starting point string yang diteruskan. Untuk pencatatan running log akan dijelaskan pada bagian nomor 4.
 
 ## Hasil run
 
@@ -315,7 +315,7 @@ void decryptRot13(char *path)
 
 # Soal 3
 
-- Pada utility functions RENAME dilakukan pengecekan apakah direktori direname dengan menambahkan A_is_a_ atau menghilangkan A_is_a_ dengan fungsi strstr().
+- Pada utility functions RENAME akan dilakukan pengecekan apakah direktori direname dengan menambahkan A_is_a_ atau menghilangkan A_is_a_ dengan fungsi strstr().
 ```c
 static int xmp_rename(const char *from, const char *to)
 {
@@ -347,7 +347,7 @@ static int xmp_rename(const char *from, const char *to)
 	return 0;
 }
 ```
-- Jika terdeteksi A_is_a_ pada path tujuan berarti direktori direname dengan menambahkan A_is_a_. Maka dilanjutkan dengan mengubah nama file menjadi lowercase dan menambahkan nilai desimalnya sebagai ekstensi yang baru pada fungsi encryptBinary.
+- Jika terdeteksi A_is_a_ pada path tujuan berarti direktori direname dengan menambahkan A_is_a_. Maka akan dilanjutkan dengan mengubah nama file menjadi lowercase dan menambahkan nilai desimalnya sebagai ekstensi yang baru pada fungsi encryptBinary.
 ```c
 void getBinary(char *fname, char *bin, char *lowercase){
 	int endid = ext_id(fname);
@@ -414,7 +414,7 @@ void encryptBinary(char *fpath)
 }
 
 ```
-- Jika terdeteksi A_is_a_ pada path asal dan tidak terdeteksi A_is_a_ pada path tujuan berarti direktori direname dengan menghilangkan A_is_a_. Maka dilanjutkan dengan mengubah nama file menjadi semula dengan bantuan nilai desimalnya pada fungsi decryptBinary.
+- Jika terdeteksi A_is_a_ pada path asal dan tidak terdeteksi adanya A_is_a_ pada path tujuan berarti direktori direname dengan menghilangkan A_is_a_. Maka akan dilanjutkan dengan mengubah nama file menjadi semula dengan bantuan nilai desimalnya pada fungsi decryptBinary.
 ```c
 int convertDec(char *ext){
 	int dec = 0, pengali = 1;
@@ -501,7 +501,7 @@ void decryptBinary(char *fpath)
 	closedir(dp);
 }
 ```
-Untuk pencatatan log akan dijelaskan pada soal nomor 4.
+Untuk pencatatan running log akan dijelaskan pada bagian nomor 4.
 
 ## Hasil run
 
@@ -521,7 +521,7 @@ Untuk pencatatan log akan dijelaskan pada soal nomor 4.
 - bingung saat melakukan dekripsi karena perlu mengambil nilai desimalnya yang ada di paling belakang nama file.
 
 # Soal 4
-- Untuk soal ini kita diminta untuk membuat log system yang bertujuan untuk memudahkan dalam memonitor kegiatan pada file system. Disini kita membuat dua fungsi dalam pembuatan log system ini yaitu fungsi tulisLog dan tulisLog2 perbedaannya terdapat pada DESC (informasi dan parameter tambahan) yang perlu dicantumkan dalam format untuk loggingnya. Dalam menuliskan log system sesuai format yang ada kita perlu mencari waktu sekarang untuk nanti dicantumkan dalam log systemnya. Dalam fungsi tulisLog kita juga memasukkan parameter char *nama yang mana adalah System Call dan char *fpath adalah deskripsi mengenai file yang ada.
+- Untuk soal ini kelompok kami diminta untuk membuat sebuah log system yang bertujuan untuk melakukan pencatatan aktivitas dalam file. Disini kelompok kami membuat dua fungsi dalam pembuatan log system ini yaitu fungsi tulisLog dan tulisLog2 dimana perbedaannya terdapat pada DESC (informasi dan parameter tambahan) yang perlu dicantumkan dalam format untuk menuliskan lognya. Agar bisa menuliskan log system sesuai format yang ada, maka kelompok kami perlu mencari waktu sekarang untuk nanti dicantumkan dalam log systemnya. Dalam fungsi tulisLog kita juga memasukkan parameter char *nama yang mana adalah System Call dan char *fpath yang mana adalah deskripsi mengenai file yang ada.
 
 ```c
 void tulisLog(char *nama, char *fpath)
@@ -532,7 +532,7 @@ void tulisLog(char *nama, char *fpath)
 	timeinfo = localtime(&rawtime);
 ```
 
-- Selanjutnya kita inisialisasi sebuah array of char atau string haha untuk nanti menyimpan perintah system call yang telah dijalankan pada filesystem dan mencatatnya dalam file SinSeiFS.log. Lalu kita perlu membuka file SinSeiFS.log pada direktori home pengguna dengan mode a (append) agar nanti bisa dituliskan log yang baru dan jika file belum ada maka akan dibuat file yang baru.
+- Selanjutnya kelompok kami melakukan inisialisasi sebuah array of char untuk menyimpan perintah system call yang telah dijalankan pada filesystem dan kemudian mencatatnya dalam file SinSeiFS.log. Lalu dibukalah file SinSeiFS.log pada direktori home pengguna dengan mode a (append) agar nanti bisa dituliskan log yang baru dan jika file belum ada maka akan dibuat file yang baru.
 ```c
 	char haha[1000];
 	
@@ -540,7 +540,7 @@ void tulisLog(char *nama, char *fpath)
 	file = fopen("/home/aldo/SinSeiFS.log", "a");
 ```
 
-- Selanjutnya kita bisa melakukan pengecekan pada syscall yang ada pada parameter. Jika syscall adalah RMDIR atau UNLINK maka log levelnya akan dicatat WARNING. Namun jika tidak, maka log levelnya akan dicatat INFO. Dan akan dicatat juga waktu sekarang beserta keterangan lainnya.
+- Selanjutnya kelompok kami melakukan pengecekan pada syscall yang ada pada parameter. Jika syscall adalah RMDIR atau UNLINK maka log levelnya akan dicatat WARNING. Namun jika tidak, maka log levelnya akan dicatat INFO. Dan akan dilakukan juga pencatatan waktu sekarang beserta keterangan lainnya.
 ```c
 	if (strcmp(nama, "RMDIR") == 0 || strcmp(nama, "UNLINK") == 0)
 		sprintf(haha, "WARNING::%.2d%.2d%d-%.2d:%.2d:%.2d::%s::%s\n", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, nama, fpath);
@@ -548,7 +548,7 @@ void tulisLog(char *nama, char *fpath)
 		sprintf(haha, "INFO::%.2d%.2d%d-%.2d:%.2d:%.2d::%s::%s\n", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, nama, fpath);
 ```
 
-- Langkah terakhir kita tuliskan log yang ada kedalam file SinSeiFS.log dan kita tutup filenya.
+- Langkah terakhir, kami tuliskan log yang ada kedalam file SinSeiFS.log dan kami tutup filenya.
 ```c
 	fputs(haha, file);
 	fclose(file);
@@ -581,7 +581,7 @@ void tulisLog2(char *nama, const char *from, const char *to)
 }
 ```
 
-- Lalu untuk implementasinya kita masukkan fungsi-fungsi ini kedalam setiap fungsi system call yang ada.
+- Lalu untuk implementasinya kami masukkan fungsi-fungsi ini kedalam setiap fungsi system call yang ada.
 
 ## Hasil run
 
