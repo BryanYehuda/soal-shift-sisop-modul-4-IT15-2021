@@ -1,7 +1,6 @@
 # soal-shift-sisop-modul-4-IT15-2021
 
 # Soal 1
-```c
 static struct fuse_operations xmp_oper = {
 	.getattr = xmp_getattr,
 	.readdir = xmp_readdir,
@@ -24,29 +23,28 @@ static struct fuse_operations xmp_oper = {
 	.chown = xmp_chown,
 	.statfs = xmp_statfs,
 };  
-```
 
 struktur fuse yang kami gunakan adalah seperti diatas :
 
-getattr = Untuk mengembalikan attribute dari suatu file  
-readdir = Untuk melakukan pembacaan directory  
-read = untuk melakukan pembacaan file  
-mkdir = untuk pembuatan suatu directory baru  
-rmdir = untuk menghapus directory  
-rename = untuk menganti nama sebuah directory ataupun file  
-truncate = perpanjang file yang diberikan sehingga ukurannya tepat beberapa byte  
-write = penulisan ke suatu file atau directory  
-open = membuka file  
-statfs = mengembalikan statistic dari file yang digunakan  
-unlink = menghapus simbolik link dan file yang diberikan  
-readlink = Jika jalur adalah tautan simbolik, isi buf dengan targetnya, hingga ukuran tertentu.  
-mknod = Buat file (perangkat) khusus, FIFO, atau soket.  
-symlink = Buat tautan simbolik bernama "dari" yang, ketika dievaluasi, akan mengarah ke "ke".  
-link = Buat hardlink antara "dari" dan "ke".  
-chmod = memodifikasi izin  
-chown = mengganti kepemilikan file  
+getattr = Untuk mengembalikan attribute dari suatu file
+readdir = Untuk melakukan pembacaan directory
+read = untuk melakukan pembacaan file
+mkdir = untuk pembuatan suatu directory baru
+rmdir = untuk menghapus directory
+rename = untuk menganti nama sebuah directory ataupun file
+truncate = perpanjang file yang diberikan sehingga ukurannya tepat beberapa byte
+write = penulisan ke suatu file atau directory
+open = membuka file
+statfs = mengembalikan statistic dari file yang digunakan
+unlink = menghapus simbolik link dan file yang diberikan
+readlink = Jika jalur adalah tautan simbolik, isi buf dengan targetnya, hingga ukuran tertentu.
+mknod = Buat file (perangkat) khusus, FIFO, atau soket.
+symlink = Buat tautan simbolik bernama "dari" yang, ketika dievaluasi, akan mengarah ke "ke".
+link = Buat hardlink antara "dari" dan "ke".
+chmod = memodifikasi izin
+chown = mengganti kepemilikan file
 
-1. Jika sebuah direktori dibuat dengan awalan “AtoZ_”, maka direktori tersebut akan menjadi direktori ter-encode.  
+a. Jika sebuah direktori dibuat dengan awalan “AtoZ_”, maka direktori tersebut akan menjadi direktori ter-encode.  
 
 ```c
 static int xmp_mkdir(const char *path, mode_t mode){
@@ -67,7 +65,8 @@ static int xmp_mkdir(const char *path, mode_t mode){
 ```
 Ketika menggunakan mkdir, akan dibandingkan dengan strstr apakah direktory skrng terdapat variabel atoz(isinya AtoZ). jika terdapat panggil fungsi dekripsiMenjadiAtbash(a) lalu masukkan ke log dengan memanggil fungsi writeTheLog("MKDIR", filepath)
 
-2. Jika sebuah direktori di-rename dengan awalan “AtoZ_”, maka direktori tersebut akan menjadi direktori ter-encode.  
+b. Jika sebuah direktori di-rename dengan awalan “AtoZ_”, maka direktori tersebut akan menjadi direktori ter-encode.  
+c. Apabila direktori yang terenkripsi di-rename menjadi tidak ter-encode, maka isi direktori tersebut akan terdecode.  
 ```c
 static int xmp_rename(const char *from, const char *to){
 	int result;
@@ -89,22 +88,63 @@ static int xmp_rename(const char *from, const char *to){
 	writeTheLog2("RENAME", dariDir, keDir);
 	
 	if (c != NULL){lakukanEnkripsi(keDir);writeTheLog2("ENCRYPT2", from, to);}
-	if (b != NULL && c == NULL){lakukanDekripsi(keDir);writeTheLog2("DECRYPT2", from, to);}
-	if (strstr(to, aisa) != NULL){encryptBinary(keDir);writeTheLog2("ENCRYPT3", from, to);}
-	if (strstr(from, aisa) != NULL && strstr(to, aisa) == NULL){decryptBinary(keDir);writeTheLog2("DECRYPT3", from, to);}
+	//kodelain
 
 	return 0;
 }
 ```
-Ketika dipanggil rename, dia akan membandingkan file apakah pada nama file terdapat "AtoZ" jika terdapat lakukan deskripsi atbash dengan memanggil fungsi dekripsiMenjadiAtbash(a) lalu tulis ke dalam log RENAME dan dari posisi mana ke mana
+```c
+static int xmp_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi){
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+    //kodelain
+
+	if (strcmp(path, "/") == 0){path = dirPath;sprintf(filepath, "%s", path);}
+	else{sprintf(filepath, "%s%s", dirPath, path);}
+
+	if (x != 24) x++;
+	else writeTheLog("READDIR", filepath);
+
+	int result = 0;
+	DIR *dp;
+	struct dirent *de;
+
+	(void)offset;
+	(void)fi;
+
+	dp = opendir(filepath);
+	if (dp == NULL) return -errno;
+
+	while ((de = readdir(dp)) != NULL){
+		if(strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) continue;
+
+		struct stat st;
+		memset(&st, 0, sizeof(st));
+		st.st_ino = de->d_ino;
+		st.st_mode = de->d_type << 12;
+
+		if (a != NULL) enkripsiMenjadiAtbash(de->d_name);
+		//kodelain
+		result = (filler(buf, de->d_name, &st, 0));
+		if (result != 0) break;
+	}
+
+	closedir(dp);
+	return 0;
+}
+```
+Ketika dipanggil rename, dia akan membandingkan file apakah pada nama file terdapat "AtoZ" jika terdapat lakukan deskripsi atbash dengan memanggil fungsi lakukanEnkripsi(keDir) lalu tulis ke dalam log RENAME dan dari posisi mana ke mana
+jika direname kembali dengan menghilangkan AtoZ maka dia akan kembali kefungsi semula dengan memanggil fungsi deskripsiAtbash
+
 
 Berikut adalah penjelasan bagaimana fungsi enkripsi dan deskripsi bekerja
 
-Pada bagian ini kami diminta untuk melakukan enkripsi maupun dekripsi terhadap nama file dan nama folder menggunakan Atbash cipher. Untuk mendapatkan nama file dan nama folder yang diinginkan, kelompok kami melakukan looping untuk melakukan pengecekkan posisi awal berupa slash (/) dan posisi akhir berupa titik (.). Disini kami menerapkan 3 fungsi untuk mendapatkan index awal berupa slash (/) dan berupa titik (.) enkripsi dan dekripsi:  
+Pada bagian ini kami diminta untuk melakukan enkripsi maupun dekripsi terhadap nama file dan nama folder menggunakan Atbash cipher. Untuk mendapatkan nama file dan nama folder yang diinginkan, kelompok kami melakukan looping untuk melakukan pengecekkan posisi awal berupa slash (/) dan posisi akhir berupa titik (.). Disini kami menerapkan 3 fungsi untuk mendapatkan index awal berupa slash (/) dan berupa titik (.) enkripsi dan dekripsi:
 
-```c 
-int split_ext_id(char *path)
-{
+int split_ext_id(char *path){
 	int ada = 0;
 	for(int i=strlen(path)-1; i>=0; i--){
 		if (path[i] == '.'){
@@ -114,32 +154,25 @@ int split_ext_id(char *path)
 	}
 	return strlen(path);
 }
-```
-Fungsi diatas dipanggil untuk mengembalikan index file extension pada  file yang sudah dipisahkan 
-```c
+Fungsi diatas dipanggil untuk mengembalikan index file extension pada file yang sudah dipisahkan. Pada program tersebut akan dilakukan perulangan sepanjang length dari path yang dipassing. setelah ketemu "." maka akan direturn titiknya berada pada posisi berapa
 
-int ext_id(char *path)
-{
+int ext_id(char *path){
 	for(int i=strlen(path)-1; i>=0; i--){
 		if (path[i] == '.') return i;
 	}
 	return strlen(path);
 }
-```
 fungsi diatas dipanggil untuk Mengembalikan index file extension berada pada posisi keberapa
-```c
-int slash_id(char *path, int mentok)
-{
+
+int slash_id(char *path, int mentok){
 	for(int i=0; i<strlen(path); i++){
 		if (path[i] == '/') return i + 1;
 	}
 	return mentok;
 }
-```
-fungsi diatas dipanggil untuk Mengembalikan index slash berada pada posisi ke berapa
+fungsi diatas dipanggil untuk Mengembalikan index slash berada pada posisi ke berapa. Inti dari program ini adalah melakukan perulangan pada path yang diterima. jika slash terdeteksi akan dikembalikan posisi slash+1
 
-- Untuk melakukan enkripsi dan dekripsi dengan Atbash cipher akan dibuat fungsi berikut ini:
-
+untuk melakukan enkripsi dan deskripsi seperti yang sudah dijelaskan diatas, saya menggunakan kode berikut ini :
 ```c
 void encryptAtbash(char *path)
 {
@@ -187,7 +220,8 @@ void decryptAtbash(char *path)
 	}
 }
 ```
-- Pemanggilan fungsi dekripsi dilakukan pada tiap utility functions seperti getattr, mkdir, rename, rmdir, create, dan fungsi-fungsi lain yang menurut kelompok kami sering digunakan dalam proses sinkronisasi FUSE dan mount folder. Fungsi dekripsi dan enkripsi akan dilakukan di utility function readdir karena FUSE akan melakukan dekripsi di mount folder lalu dilakukan enkripsi di FUSE saat readdir. Pemanggilannya dilakukan dengan pengecekan apakah string AtoZ_ terdapat di string path di masing-masing utility function dengan menggunakan fungsi strstr(). Jika terdeteksi ada string AtoZ_, maka fungsi enkripsi dan dekripsi akan dipanggil untuk string tersebut dengan AtoZ_ sebagai starting point string yang diteruskan. Untuk pencatatan hasil running log akan dijelaskan pada bagian nomor 4.
+
+Untuk soal penulisan log akan lebih dijelaskan pada soal nomor 4. Untuk setiap fungsi rename, mkdir, getattr yang dijalankan oleh system sudah akan tercatat pada log. Dan untuk enkripsi dan deskripsi sudah dilakukan secara rekursi
 
 ## Hasil run
 - Folder Awal
