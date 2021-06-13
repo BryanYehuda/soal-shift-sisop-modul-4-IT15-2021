@@ -206,8 +206,7 @@ void decryptAtbash(char *path)
 
 
 # Soal 2
-- Pada utility functions RENAME akan kami lakukan pengecekan apakah direktori dilakukan rename dengan menambahkan RX_ ataupun menghilangkan RX_ dengan fungsi strstr().
-Kemudian kami akan melakukan pengecekkan apakah di dalam path tersebut terdapat string RX_. Jika ditemukan terdapat string RX_ maka akan dienkripsi file file yang ada di dalam direktorinya. Disini kelompok kami menggunakan atbash dan rot13 cipher sesuai perintah di dalam soal, dimana untuk penggunaan atbash sudah dijelaskan pada bagian 1. Selanjutnya  file tadi yang sudah terenkripsi dengan atbash akan dilakukan enkripsi lebih lanjut dengan rot13. Begitu juga dengan fungsi dekripsi pada pencarian path aslinya. Kelompok kami perlu melakukan dekripsi menggunakan atbash dan rot13 cipher tadi.  
+- Menggunakan fungsi strstr(), akan dilakukan pengecekkan apakah suatu direktori dilakukan rename dengan menambahkan RX_ ataupun penghapusan RX_. Setelah kelompok kami lakukan pengecekkan apakah di dalam path tersebut ada string RX_. Jika ditemukan adanya string tersebut, maka akan dilakukan enkripsi filenya menggunakan atbash dan rot13 cipher sesuai dengan perintah soal. Hal yang sama akan diterapkan pada fungsi dekripsinya yaitu jika pada awalnya ada RX_ kemudian dilakukan penghapusan string RX_, maka akan dilakukan dekripsi pada filenya menggunakan atbash dan rot13 cipher sesuai dengan perintah soal.  
 
 ```c
 static int xmp_rename(const char *from, const char *to)
@@ -253,7 +252,7 @@ static int xmp_rename(const char *from, const char *to)
 	return 0;
 }
 ```
-- Jika terdeteksi adanya string RX_ pada path tujuan berarti direktori direname dengan menambahkan RX_ dan dilanjutkan dengan melakukan pemecahan file pada fungsi enkripsi2.
+- Jika terdeteksi adanya string RX_ pada path tujuan berarti telah dilakukan rename dengan menambahkan RX_ sehingga akan dilakukan dekripsi pada file menggunakan atbash dan rot13 cipher yang kemudian akan dilanjutkan dengan melakukan pemecahan file menjadi berukuran 1024 byte sesuai dengan perintah pada soal.
 ```c
 void enkripsi2(char *fpath)
 {
@@ -302,7 +301,7 @@ void enkripsi2(char *fpath)
 }
 ```
 
-- Jika terdeteksi string RX_ pada path asal dan tidak terdeteksi string RX_ pada path tujuan berarti direktori direname dengan menghilangkan RX_ sehingga akan dilanjutkan dengan menggabungkan file pada fungsi dekripsi2.
+- Jika terdeteksi string RX_ pada path asal dan tidak terdeteksi string RX_ pada path tujuan berarti telah dilakukan rename dengan menghilangkan RX_ sehingga akan dilakukan penggabungan file menjadi satu kesatuan dan kemudian dilakukan dekripsi menggunakan atbash dan rot13 cipher pada file tersebut.    
 ```c
 void dekripsi2(char *dir)
 {
@@ -646,7 +645,7 @@ void tulisLog(char *nama, char *fpath)
 	char haha[1000];
 	
 	FILE *file;
-	file = fopen("/home/aldo/SinSeiFS.log", "a");
+	file = fopen("/home/ianfelix/SinSeiFS.log", "a");
 ```
 
 - Selanjutnya kelompok kami melakukan pengecekan pada syscall yang ada pada parameter. Jika syscall adalah RMDIR atau UNLINK maka log levelnya akan dicatat WARNING. Namun jika tidak, maka log levelnya akan dicatat INFO. Dan akan dilakukan juga pencatatan waktu sekarang beserta keterangan lainnya.
@@ -677,7 +676,7 @@ void tulisLog2(char *nama, const char *from, const char *to)
 	char haha[1000];
 
 	FILE *file;
-	file = fopen("/home/aldo/SinSeiFS.log", "a");
+	file = fopen("/home/ianfelix/SinSeiFS.log", "a");
 
 	if (strcmp(nama, "RMDIR") == 0 || strcmp(nama, "UNLINK") == 0)
 		sprintf(haha, "WARNING::%.2d%.2d%d-%.2d:%.2d:%.2d::%s::%s::%s\n", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, nama, from, to);
