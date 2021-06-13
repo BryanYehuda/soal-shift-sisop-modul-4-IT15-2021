@@ -202,9 +202,6 @@ void decryptAtbash(char *path)
 
 ![image](https://user-images.githubusercontent.com/73151866/121809300-7f65e400-cc86-11eb-9f5a-f7297cdbffdf.png)
 
-## Kendala yang Dihadapi
-
-
 # Soal 2
 - Menggunakan fungsi strstr(), akan dilakukan pengecekkan apakah suatu direktori dilakukan rename dengan menambahkan RX_ ataupun penghapusan RX_. Setelah kelompok kami lakukan pengecekkan apakah di dalam path tersebut ada string RX_. Jika ditemukan adanya string tersebut, maka akan dilakukan enkripsi filenya menggunakan atbash dan rot13 cipher sesuai dengan perintah soal. Hal yang sama akan diterapkan pada fungsi dekripsinya yaitu jika pada awalnya ada RX_ kemudian dilakukan penghapusan string RX_, maka akan dilakukan dekripsi pada filenya menggunakan atbash dan rot13 cipher sesuai dengan perintah soal.  
 
@@ -416,9 +413,6 @@ void decryptRot13(char *path)
 
 ![image](https://user-images.githubusercontent.com/73151866/121809847-ad4c2800-cc88-11eb-8f27-e0dc0cbd58a5.png)
 
-## Kendala yang dihadapi
-
-
 # Soal 3
 
 - Pada utility functions RENAME akan dilakukan pengecekan apakah direktori direname dengan menambahkan A_is_a_ atau menghilangkan A_is_a_ dengan fungsi strstr().
@@ -623,11 +617,6 @@ Untuk pencatatan running log akan dijelaskan pada bagian nomor 4.
 
 ![image](https://user-images.githubusercontent.com/73151866/121809383-c358e900-cc86-11eb-9c41-24846334d4eb.png)
 
-## Kendala yang dialami
-- Waktu pengerjaan tidak cukup untuk mengerjakannya
-- Sulit untuk memahami maksud dari soal dengan adanya direktori spesial 
-- bingung saat melakukan dekripsi karena perlu mengambil nilai desimalnya yang ada di paling belakang nama file.
-
 # Soal 4
 - Untuk soal ini kelompok kami diminta untuk membuat sebuah log system yang bertujuan untuk melakukan pencatatan aktivitas dalam file. Disini kelompok kami membuat dua fungsi dalam pembuatan log system ini yaitu fungsi tulisLog dan tulisLog2 dimana perbedaannya terdapat pada DESC (informasi dan parameter tambahan) yang perlu dicantumkan dalam format untuk menuliskan lognya. Agar bisa menuliskan log system sesuai format yang ada, maka kelompok kami perlu mencari waktu sekarang untuk nanti dicantumkan dalam log systemnya. Dalam fungsi tulisLog kita juga memasukkan parameter char *nama yang mana adalah System Call dan char *fpath yang mana adalah deskripsi mengenai file yang ada.
 
@@ -698,3 +687,6 @@ void tulisLog2(char *nama, const char *from, const char *to)
 ## Kendala yang dialami
 -  kesulitan dalam mengambil waktu sekarang (real time) dan pada pencatatannya.
 -  bingung untuk mencatat System Call karena ada yang punya 1 atau 2 argumen. Akhirnya kami pisahkan menjadi 2 fungsi untut mencatat log.
+-  Terkadang file file yang ada di Downloads tidak muncul semuanya ketika sudah dimount
+-  Contoh kode dari asisten di github, sangat sederhana sehingga kami tidak punya acuan bagaimana cara mengoding dengan baik dan benar. Di internet juga referensinya sangat sedikit
+-  Kebingungan memaknai folder special / directory special itu seperti apa
