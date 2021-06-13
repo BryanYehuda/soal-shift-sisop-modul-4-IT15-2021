@@ -598,7 +598,9 @@ Untuk pencatatan running log akan dijelaskan pada bagian nomor 4.
 ![image](https://user-images.githubusercontent.com/73151866/121809383-c358e900-cc86-11eb-9c41-24846334d4eb.png)
 
 # Soal 4
-- Untuk soal ini kelompok kami diminta untuk membuat sebuah log system yang bertujuan untuk melakukan pencatatan aktivitas dalam file. Disini kelompok kami membuat dua fungsi dalam pembuatan log system ini yaitu fungsi tulisLog dan tulisLog2 dimana perbedaannya terdapat pada DESC (informasi dan parameter tambahan) yang perlu dicantumkan dalam format untuk menuliskan lognya. Agar bisa menuliskan log system sesuai format yang ada, maka kelompok kami perlu mencari waktu sekarang untuk nanti dicantumkan dalam log systemnya. Dalam fungsi tulisLog kita juga memasukkan parameter char *nama yang mana adalah System Call dan char *fpath yang mana adalah deskripsi mengenai file yang ada.
+- Untuk soal ini kami membuat sebuah log system untuk melakukan pencatatan aktivitas dalam file. Disini kelompok kami membuat dua fungsi dalam pembuatan log system ini yaitu fungsi writeTheLog dan writeTheLog2 dimana perbedaannya terdapat pada deskripsi atau informasi dan parameter tambahan yang perlu dicantumkan dalam format untuk menuliskan lognya.
+
+Agar bisa menuliskan log system sesuai format yang ada, maka kelompok kami perlu mencari waktu saat ini untuk nanti dicantumkan dalam log systemnya. Dalam fungsi tulisLog kita juga memasukkan parameter char *nama yang mana adalah System Call dan char *fpath yang mana adalah deskripsi mengenai file yang ada.
 
 ```c
 void writeTheLog(char *nama, char *filepath)
@@ -609,7 +611,7 @@ void writeTheLog(char *nama, char *filepath)
 	timeinfo = localtime(&rawtime);
 ```
 
-- Selanjutnya kelompok kami melakukan inisialisasi sebuah array of char untuk menyimpan perintah system call yang telah dijalankan pada filesystem dan kemudian mencatatnya dalam file SinSeiFS.log. Lalu dibukalah file SinSeiFS.log pada direktori home pengguna dengan mode a (append) agar nanti bisa dituliskan log yang baru dan jika file belum ada maka akan dibuat file yang baru.
+- Selanjutnya kelompok kami melakukan inisialisasi sebuah array of char untuk menyimpan perintah system call yang telah dijalankan pada filesystem dan kemudian mencatatnya dalam file SinSeiFS.log.
 ```c
 	char infoWriteLog[1000];
 	
@@ -625,7 +627,7 @@ void writeTheLog(char *nama, char *filepath)
 		sprintf(infoWriteLog, "INFO::%.2d%.2d%d-%.2d:%.2d:%.2d::%s::%s\n", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, nama, filepath);
 ```
 
-- Langkah terakhir, kami tuliskan log yang ada kedalam file SinSeiFS.log dan kami tutup filenya.
+- terakhir, kami tuliskan log yang ada kedalam file SinSeiFS.log dan kami tutup filenya.
 ```c
 	fputs(infoWriteLog, file);
 	fclose(file);
@@ -633,7 +635,7 @@ void writeTheLog(char *nama, char *filepath)
 }
 ```
 
-- Untuk fungsi yang kedua tulisLog2 sebenarnya kurang lebih sama dengan fungsi tulisLog yang sudah dijelaskan sebelumnya, namun terdapat perbedaan pada parameter yang diberikan dan pada pencatatannya. Untuk parameternya ada char *nama yang merupakan syscall, const char *from adalah keterangan file sebelum dilakukannya perintah system call yang dijalankan oleh file system dan const char *to keterangan file setelah dilakukannya perintah system call yang dijalankan oleh file system. Lalu pada pencatatannya kurang lebih sama dengan yang sebelumnya namun ditambahkan keterangan sesuai dengan parameter yang diberikan.
+- Untuk fungsi yang kedua writeTheLog2 sebenarnya kurang lebih sama dengan fungsi writeTheLog yang sudah dijelaskan sebelumnya, namun terdapat perbedaan pada parameter yang diberikan dan pada pencatatannya. Untuk parameternya ada char *nama yang merupakan syscall, const char *from adalah keterangan file sebelum dilakukannya perintah system call yang dijalankan oleh file system dan const char *to keterangan file setelah dilakukannya perintah system call yang dijalankan oleh file system. Lalu pada pencatatannya kurang lebih sama dengan yang sebelumnya namun ditambahkan keterangan sesuai dengan parameter yang diberikan.
 ```c
 void writeTheLog2(char *nama, const char *from, const char *to)
 {
@@ -657,7 +659,6 @@ void writeTheLog2(char *nama, const char *from, const char *to)
 	return;
 }
 ```
-
 - Lalu untuk implementasinya kami masukkan fungsi-fungsi ini kedalam setiap fungsi system call yang ada.
 
 ## Hasil run
