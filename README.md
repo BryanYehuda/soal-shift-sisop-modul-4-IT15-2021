@@ -421,7 +421,7 @@ void dekripsiMenjadiRot13(char *path)
 
 # Soal 3
 
-- Pada utility functions RENAME akan dilakukan pengecekan apakah direktori direname dengan menambahkan A_is_a_ atau menghilangkan A_is_a_ dengan fungsi strstr().
+- Untuk soal ini kelompok kami membuat utility functions RENAME direktri yang akan dilakukan pengecekan apakah direktori direname dengan menambahkan A_is_a_ dan menjadi direktori spesial atau menghilangkan A_is_a_ dan menjadi direktori biasa dengan fungsi strstr() yang dipanggil.
 ```c
 static int xmp_rename(const char *from, const char *to){
 	int result;
@@ -452,7 +452,7 @@ static int xmp_rename(const char *from, const char *to){
 	return 0;
 }
 ```
-- Jika terdeteksi A_is_a_ pada path tujuan berarti direktori direname dengan menambahkan A_is_a_. Maka akan dilanjutkan dengan mengubah nama file menjadi lowercase dan menambahkan nilai desimalnya sebagai ekstensi yang baru pada fungsi encryptBinary.
+- Selanjutnya terdeteksi direktori bernama A_is_a_ pada path tujuan berarti direktori direname dengan menambahkan A_is_a_ pada nama direktori . Maka akan dilanjutkan dengan mengubah nama file menjadi lowercase dan menambahkan nilai desimalnya sebagai ekstensi yang baru pada fungsi encryptBinary pada bagian file.
 ```c
 void ambilBiner(char *fname, char *bin, char *lowercase){
 	int idAkhir = extensionId(fname);
@@ -507,7 +507,7 @@ void encryptBinary(char *filepath){
     closedir(dp);
 }
 ```
-- Jika terdeteksi A_is_a_ pada path asal dan tidak terdeteksi adanya A_is_a_ pada path tujuan berarti direktori direname dengan menghilangkan A_is_a_. Maka akan dilanjutkan dengan mengubah nama file menjadi semula dengan bantuan nilai desimalnya pada fungsi decryptBinary.
+- Selanjutnya apabila terdeteksi direktori A_is_a_ pada path asal dan tidak terdeteksi adanya A_is_a_ pada path tujuan berarti direktori direname dengan menghilangkan A_is_a_ maka direktori tersebut akan kembali menjadi direktori awal. Maka akan dilanjutkan dengan mengubah nama file menjadi semula dengan bantuan nilai desimalnya pada fungsi decryptBinary.
 ```c
 int convertDec(char *ext){
 	int dec = 0, pengali = 1;
