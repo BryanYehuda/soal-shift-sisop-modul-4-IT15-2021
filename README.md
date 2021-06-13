@@ -1,6 +1,51 @@
 # soal-shift-sisop-modul-4-IT15-2021
 
 # Soal 1
+```c
+static struct fuse_operations xmp_oper = {
+	.getattr = xmp_getattr,
+	.readdir = xmp_readdir,
+	.read = xmp_read,
+	.mkdir = xmp_mkdir,
+	.rmdir = xmp_rmdir,
+	.rename = xmp_rename,
+	.truncate = xmp_truncate,
+	.write = xmp_write,
+	.create = xmp_create,
+	.utimens = xmp_utimens,
+	.access = xmp_access,
+	.open = xmp_open,
+	.unlink = xmp_unlink,
+	.readlink = xmp_readlink,
+	.mknod = xmp_mknod,
+	.symlink = xmp_symlink,
+	.link = xmp_link,
+	.chmod = xmp_chmod,
+	.chown = xmp_chown,
+	.statfs = xmp_statfs,
+};  
+```
+
+struktur fuse yang kami gunakan adalah seperti diatas :
+
+getattr = Untuk mengembalikan attribute dari suatu file  
+readdir = Untuk melakukan pembacaan directory  
+read = untuk melakukan pembacaan file  
+mkdir = untuk pembuatan suatu directory baru  
+rmdir = untuk menghapus directory  
+rename = untuk menganti nama sebuah directory ataupun file  
+truncate = perpanjang file yang diberikan sehingga ukurannya tepat beberapa byte  
+write = penulisan ke suatu file atau directory  
+open = membuka file  
+statfs = mengembalikan statistic dari file yang digunakan  
+unlink = menghapus simbolik link dan file yang diberikan  
+readlink = Jika jalur adalah tautan simbolik, isi buf dengan targetnya, hingga ukuran tertentu.  
+mknod = Buat file (perangkat) khusus, FIFO, atau soket.  
+symlink = Buat tautan simbolik bernama "dari" yang, ketika dievaluasi, akan mengarah ke "ke".  
+link = Buat hardlink antara "dari" dan "ke".  
+chmod = memodifikasi izin  
+chown = mengganti kepemilikan file  
+
 Pada bagian ini kami diminta untuk melakukan enkripsi maupun dekripsi terhadap nama file dan nama folder menggunakan Atbash cipher. Untuk mendapatkan nama file dan nama folder yang diinginkan, kelompok kami melakukan looping untuk melakukan pengecekkan posisi awal berupa slash (/) dan posisi akhir berupa titik (.). Disini kami menerapkan 3 fungsi untuk mendapatkan index awal berupa slash (/) dan berupa titik (.) enkripsi dan dekripsi:  
 - slash_id : Mengembalikan index slash
 - ext_id : Mengembalikan index file extension
