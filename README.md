@@ -143,7 +143,7 @@ jika direname kembali dengan menghilangkan AtoZ maka dia akan kembali kefungsi s
 Berikut adalah penjelasan bagaimana fungsi enkripsi dan deskripsi bekerja
 
 Pada bagian ini kami diminta untuk melakukan enkripsi maupun dekripsi terhadap nama file dan nama folder menggunakan Atbash cipher. Untuk mendapatkan nama file dan nama folder yang diinginkan, kelompok kami melakukan looping untuk melakukan pengecekkan posisi awal berupa slash (/) dan posisi akhir berupa titik (.). Disini kami menerapkan 3 fungsi untuk mendapatkan index awal berupa slash (/) dan berupa titik (.) enkripsi dan dekripsi:
-
+```c
 int split_ext_id(char *path){
 	int ada = 0;
 	for(int i=strlen(path)-1; i>=0; i--){
@@ -154,22 +154,25 @@ int split_ext_id(char *path){
 	}
 	return strlen(path);
 }
+```
 Fungsi diatas dipanggil untuk mengembalikan index file extension pada file yang sudah dipisahkan. Pada program tersebut akan dilakukan perulangan sepanjang length dari path yang dipassing. setelah ketemu "." maka akan direturn titiknya berada pada posisi berapa
-
+```c
 int ext_id(char *path){
 	for(int i=strlen(path)-1; i>=0; i--){
 		if (path[i] == '.') return i;
 	}
 	return strlen(path);
 }
+```
 fungsi diatas dipanggil untuk Mengembalikan index file extension berada pada posisi keberapa
-
+```c
 int slash_id(char *path, int mentok){
 	for(int i=0; i<strlen(path); i++){
 		if (path[i] == '/') return i + 1;
 	}
 	return mentok;
 }
+```
 fungsi diatas dipanggil untuk Mengembalikan index slash berada pada posisi ke berapa. Inti dari program ini adalah melakukan perulangan pada path yang diterima. jika slash terdeteksi akan dikembalikan posisi slash+1
 
 untuk melakukan enkripsi dan deskripsi seperti yang sudah dijelaskan diatas, saya menggunakan kode berikut ini :
