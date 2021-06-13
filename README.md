@@ -46,10 +46,61 @@ link = Buat hardlink antara "dari" dan "ke".
 chmod = memodifikasi izin  
 chown = mengganti kepemilikan file  
 
+1. Jika sebuah direktori dibuat dengan awalan “AtoZ_”, maka direktori tersebut akan menjadi direktori ter-encode.  
+
+```c
+static int xmp_mkdir(const char *path, mode_t mode){
+	int result;
+	char filepath[1000];
+	
+	char *a = strstr(path, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+
+	//kodelain...
+
+	result = mkdir(filepath, mode);
+	writeTheLog("MKDIR", filepath);
+
+	if (result == -1) return -errno;
+	return 0;
+}
+```
+Ketika menggunakan mkdir, akan dibandingkan dengan strstr apakah direktory skrng terdapat variabel atoz(isinya AtoZ). jika terdapat panggil fungsi dekripsiMenjadiAtbash(a) lalu masukkan ke log dengan memanggil fungsi writeTheLog("MKDIR", filepath)
+
+2. Jika sebuah direktori di-rename dengan awalan “AtoZ_”, maka direktori tersebut akan menjadi direktori ter-encode.  
+```c
+static int xmp_rename(const char *from, const char *to){
+	int result;
+	char dariDir[1000], keDir[1000];
+	
+    //kodelain
+
+	char *a = strstr(to, atoz);
+	if (a != NULL) dekripsiMenjadiAtbash(a);
+	
+	//kodelain
+
+	sprintf(dariDir, "%s%s", dirPath, from);
+	sprintf(keDir, "%s%s", dirPath, to);
+
+	result = rename(dariDir, keDir);
+	if (result == -1) return -errno;
+
+	writeTheLog2("RENAME", dariDir, keDir);
+	
+	if (c != NULL){lakukanEnkripsi(keDir);writeTheLog2("ENCRYPT2", from, to);}
+	if (b != NULL && c == NULL){lakukanDekripsi(keDir);writeTheLog2("DECRYPT2", from, to);}
+	if (strstr(to, aisa) != NULL){encryptBinary(keDir);writeTheLog2("ENCRYPT3", from, to);}
+	if (strstr(from, aisa) != NULL && strstr(to, aisa) == NULL){decryptBinary(keDir);writeTheLog2("DECRYPT3", from, to);}
+
+	return 0;
+}
+```
+Ketika dipanggil rename, dia akan membandingkan file apakah pada nama file terdapat "AtoZ" jika terdapat lakukan deskripsi atbash dengan memanggil fungsi dekripsiMenjadiAtbash(a) lalu tulis ke dalam log RENAME dan dari posisi mana ke mana
+
+Berikut adalah penjelasan bagaimana fungsi enkripsi dan deskripsi bekerja
+
 Pada bagian ini kami diminta untuk melakukan enkripsi maupun dekripsi terhadap nama file dan nama folder menggunakan Atbash cipher. Untuk mendapatkan nama file dan nama folder yang diinginkan, kelompok kami melakukan looping untuk melakukan pengecekkan posisi awal berupa slash (/) dan posisi akhir berupa titik (.). Disini kami menerapkan 3 fungsi untuk mendapatkan index awal berupa slash (/) dan berupa titik (.) enkripsi dan dekripsi:  
-- slash_id : Mengembalikan index slash
-- ext_id : Mengembalikan index file extension
-- split_ext_id : Mengembalikan index file extension pada file yang displit
 
 ```c 
 int split_ext_id(char *path)
@@ -63,6 +114,9 @@ int split_ext_id(char *path)
 	}
 	return strlen(path);
 }
+```
+Fungsi diatas dipanggil untuk mengembalikan index file extension pada  file yang sudah dipisahkan 
+```c
 
 int ext_id(char *path)
 {
@@ -71,7 +125,9 @@ int ext_id(char *path)
 	}
 	return strlen(path);
 }
-
+```
+fungsi diatas dipanggil untuk Mengembalikan index file extension berada pada posisi keberapa
+```c
 int slash_id(char *path, int mentok)
 {
 	for(int i=0; i<strlen(path); i++){
@@ -80,6 +136,7 @@ int slash_id(char *path, int mentok)
 	return mentok;
 }
 ```
+fungsi diatas dipanggil untuk Mengembalikan index slash berada pada posisi ke berapa
 
 - Untuk melakukan enkripsi dan dekripsi dengan Atbash cipher akan dibuat fungsi berikut ini:
 
