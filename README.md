@@ -135,9 +135,15 @@ void decryptAtbash(char *path)
 ## Hasil run
 - Folder Awal
 
+![image](https://user-images.githubusercontent.com/73151866/121809272-678e6000-cc86-11eb-8e11-5a1c0261e786.png)
+
 - Setelah di enkripsi
 
+![image](https://user-images.githubusercontent.com/73151866/121809281-6d844100-cc86-11eb-92d3-a49e677f1a73.png)
+
 - Setelah di dekripsi
+
+![image](https://user-images.githubusercontent.com/73151866/121809300-7f65e400-cc86-11eb-9f5a-f7297cdbffdf.png)
 
 ## Kendala yang Dihadapi
 
@@ -340,11 +346,15 @@ void decryptRot13(char *path)
 
 - Folder Awal
 
-
+![image](https://user-images.githubusercontent.com/73151866/121809317-8a207900-cc86-11eb-8c09-5b795ac6cc98.png)
 
 - Setelah enkripsi
 
+![image](https://user-images.githubusercontent.com/73151866/121809321-8ee52d00-cc86-11eb-8d76-456fd8d641af.png)
+
 - Setelah deksipsi
+
+![image](https://user-images.githubusercontent.com/73151866/121809349-a6241a80-cc86-11eb-92f0-7bb5ea0c07e0.png)
 
 ## Kendala yang dihadapi
 
@@ -542,12 +552,16 @@ Untuk pencatatan running log akan dijelaskan pada bagian nomor 4.
 ## Hasil run
 
 - Kondisi awal
+
+![image](https://user-images.githubusercontent.com/73151866/121809370-ba681780-cc86-11eb-8be3-0fd741093915.png)
  
 - Setelah di enkripsi
 
+![image](https://user-images.githubusercontent.com/73151866/121809374-bcca7180-cc86-11eb-8158-354b838b699c.png)
+
 - Setelah di dekripsi
 
-
+![image](https://user-images.githubusercontent.com/73151866/121809383-c358e900-cc86-11eb-9c41-24846334d4eb.png)
 
 ## Kendala yang dialami
 - Waktu pengerjaan tidak cukup untuk mengerjakannya
@@ -619,7 +633,7 @@ void tulisLog2(char *nama, const char *from, const char *to)
 
 ## Hasil run
 
-
+![image](https://user-images.githubusercontent.com/73151866/121809442-06b35780-cc87-11eb-9d85-c021a9ef5626.png)
 
 ## Kendala yang dialami
 -  kesulitan dalam mengambil waktu sekarang (real time) dan pada pencatatannya.
