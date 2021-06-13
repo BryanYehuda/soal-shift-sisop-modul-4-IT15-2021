@@ -88,18 +88,14 @@ void decryptAtbash(char *path)
 - Pemanggilan fungsi dekripsi dilakukan pada tiap utility functions seperti getattr, mkdir, rename, rmdir, create, dan fungsi-fungsi lain yang menurut kelompok kami sering digunakan dalam proses sinkronisasi FUSE dan mount folder. Fungsi dekripsi dan enkripsi akan dilakukan di utility function readdir karena FUSE akan melakukan dekripsi di mount folder lalu dilakukan enkripsi di FUSE saat readdir. Pemanggilannya dilakukan dengan pengecekan apakah string AtoZ_ terdapat di string path di masing-masing utility function dengan menggunakan fungsi strstr(). Jika terdeteksi ada string AtoZ_, maka fungsi enkripsi dan dekripsi akan dipanggil untuk string tersebut dengan AtoZ_ sebagai starting point string yang diteruskan. Untuk pencatatan hasil running log akan dijelaskan pada bagian nomor 4.
 
 ## Hasil run
-- Kondisi awal
-![121061825-8a37f900-c7ee-11eb-9924-65a0bf4f5102](https://user-images.githubusercontent.com/71550384/121785379-b8994800-cbe3-11eb-9bd6-5e513de296e2.png)
+- Folder Awal
 
 - Setelah di enkripsi
-![121061746-6f658480-c7ee-11eb-86a9-8d875f998fb4](https://user-images.githubusercontent.com/71550384/121785397-c8189100-cbe3-11eb-8fb0-5379845347b4.png)
 
 - Setelah di dekripsi
-![121061825-8a37f900-c7ee-11eb-9924-65a0bf4f5102 (1)](https://user-images.githubusercontent.com/71550384/121785410-d5ce1680-cbe3-11eb-8e32-f64b1ea15f3d.png)
 
 ## Kendala yang Dihadapi
-- Kebingungan saat menentukan utility functions mana saja yang akan dipakai.
-- Terdapat kesalahan saat enkripsi dan dekripsi pada fungsi readdir sehingga file tidak tertampil pada FUSE.
+
 
 # Soal 2
 - Pada utility functions RENAME akan kami lakukan pengecekan apakah direktori dilakukan rename dengan menambahkan RX_ ataupun menghilangkan RX_ dengan fungsi strstr().
@@ -297,20 +293,15 @@ void decryptRot13(char *path)
 
 ## Hasil run
 
-- Kondisi awal
-![121061783-7d1b0a00-c7ee-11eb-876a-0b3200353e29](https://user-images.githubusercontent.com/71550384/121785748-d9629d00-cbe5-11eb-9d13-361013cb6c4f.png)
+- Folder Awal
+
 
 
 - Setelah enkripsi
-![121061821-8906cc00-c7ee-11eb-853b-1eadf17b0cbc](https://user-images.githubusercontent.com/71550384/121785756-e41d3200-cbe5-11eb-90f9-2c478a1b1f2a.png)
-
 
 - Setelah deksipsi
-![121061783-7d1b0a00-c7ee-11eb-876a-0b3200353e29 (1)](https://user-images.githubusercontent.com/71550384/121785770-f39c7b00-cbe5-11eb-8607-9f5063769ca1.png)
 
 ## Kendala yang dihadapi
-- Pada Vigenere cipher saat dicek dengan printf terlihat sudah menghasilkan path yang benar tapi file tersebut tidak muncul pada FUSE sehingga sementara kami memakai ROT13 cipher semua.
-- Sulit untuk melakukan split dan join karena tidak boleh memakai exec*(). Pada direktori asli file sudah terpecah, tetapi pada FUSE juga tertampil file yang terpecah kecuali RX_ dihilangkan dan file tergabung kembali.
 
 
 # Soal 3
@@ -506,13 +497,11 @@ Untuk pencatatan running log akan dijelaskan pada bagian nomor 4.
 ## Hasil run
 
 - Kondisi awal
- ![121061895-a50a6d80-c7ee-11eb-9924-bd254073db3e](https://user-images.githubusercontent.com/71550384/121785909-d0260000-cbe6-11eb-9dac-0f32cb13db2c.png)
  
 - Setelah di enkripsi
-![121061900-a5a30400-c7ee-11eb-930f-c0d20c4193f4](https://user-images.githubusercontent.com/71550384/121785916-e0d67600-cbe6-11eb-8918-c9f87aa09073.png)
 
 - Setelah di dekripsi
-![121061895-a50a6d80-c7ee-11eb-9924-bd254073db3e (1)](https://user-images.githubusercontent.com/71550384/121785921-eaf87480-cbe6-11eb-8b1f-7df66686e352.png)
+
 
 
 ## Kendala yang dialami
@@ -585,7 +574,6 @@ void tulisLog2(char *nama, const char *from, const char *to)
 
 ## Hasil run
 
-![121061886-a2a81380-c7ee-11eb-87d7-e15ea1e5b1aa](https://user-images.githubusercontent.com/71550384/121786054-bb963780-cbe7-11eb-9c6a-605ca7ab8389.png)
 
 
 ## Kendala yang dialami
