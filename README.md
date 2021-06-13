@@ -352,9 +352,13 @@ void decryptRot13(char *path)
 
 ![image](https://user-images.githubusercontent.com/73151866/121809321-8ee52d00-cc86-11eb-8d76-456fd8d641af.png)
 
-- Setelah deksipsi
+- Setelah file terpecah
 
-![image](https://user-images.githubusercontent.com/73151866/121809349-a6241a80-cc86-11eb-92f0-7bb5ea0c07e0.png)
+![image](https://user-images.githubusercontent.com/73151866/121809817-8beb3c00-cc88-11eb-85e7-cd26bd2370f3.png)
+
+- File di dalam filesystem
+
+![image](https://user-images.githubusercontent.com/73151866/121809847-ad4c2800-cc88-11eb-8f27-e0dc0cbd58a5.png)
 
 ## Kendala yang dihadapi
 
