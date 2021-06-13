@@ -1,6 +1,7 @@
 # soal-shift-sisop-modul-4-IT15-2021
 
 # Soal 1
+```c
 static struct fuse_operations xmp_oper = {
 	.getattr = xmp_getattr,
 	.readdir = xmp_readdir,
@@ -23,6 +24,7 @@ static struct fuse_operations xmp_oper = {
 	.chown = xmp_chown,
 	.statfs = xmp_statfs,
 };  
+```
 
 struktur fuse yang kami gunakan adalah seperti diatas :
 
