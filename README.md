@@ -1,4 +1,11 @@
 # soal-shift-sisop-modul-4-IT15-2021
+## Laporan Pengerjaan Modul 4 Praktikum Sistem Operasi    
+
+### Nama Anggota Kelompok:  
+1. Bryan Yehuda Mannuel
+2. Calvin Mannuel Simatupang
+3. Ian Felix Jonathan Simanjuntak
+4. Muhammad Nur Fauzan
 
 # Soal 1
 ```c
@@ -228,7 +235,7 @@ void decryptAtbash(char *path)
 
 Untuk soal penulisan log akan lebih dijelaskan pada soal nomor 4. Untuk setiap fungsi rename, mkdir, getattr yang dijalankan oleh system sudah akan tercatat pada log. Dan untuk enkripsi dan deskripsi sudah dilakukan secara rekursi
 
-## Hasil run
+## Hasil Run
 - Folder Awal
 
 ![image](https://user-images.githubusercontent.com/73151866/121809272-678e6000-cc86-11eb-8e11-5a1c0261e786.png)
@@ -401,7 +408,7 @@ void dekripsiMenjadiRot13(char *path)
 ```
 - Pemanggilan fungsi dekripsi dilakukan pada tiap utility functions seperti getattr, mkdir, rename, rmdir, create, dan fungsi-fungsi lain yang menurut kelompok kami sering digunakan dalam proses sinkronisasi FUSE dan mount folder. Fungsi dekripsi dan enkripsi dilakukan di utility function readdir karena FUSE akan melakukan dekripsi di mount folder lalu enkripsi di FUSE saat readdir. Pemanggilannya dilakukan dengan melakukan pengecekan apakah string RX_ terdapat di string path di masing-masing utility function dengan menggunakan fungsi strstr(). Jika ditemukan adanya string RX_, maka fungsi enkripsi dan dekripsi akan dipanggil untuk string tersebut dengan RX_ sebagai starting point string yang diteruskan. Untuk pencatatan running log akan dijelaskan pada bagian nomor 4.
 
-## Hasil run
+## Hasil Run
 
 - Folder Awal
 
@@ -583,7 +590,7 @@ void decryptBinary(char *filepath){
 ```
 Untuk pencatatan running log akan dijelaskan pada bagian nomor 4.
 
-## Hasil run
+## Hasil Run
 
 - Kondisi awal
 
@@ -661,11 +668,11 @@ void writeTheLog2(char *nama, const char *from, const char *to)
 ```
 - Lalu untuk implementasinya kami masukkan fungsi-fungsi ini kedalam setiap fungsi system call yang ada.
 
-## Hasil run
+## Hasil Run
 
 ![image](https://user-images.githubusercontent.com/73151866/121809442-06b35780-cc87-11eb-9d85-c021a9ef5626.png)
 
-## Kendala yang dialami
+## Kendala yang Dihadapi
 -  kesulitan dalam mengambil waktu sekarang (real time) dan pada pencatatannya.
 -  bingung untuk mencatat System Call karena ada yang punya 1 atau 2 argumen. Akhirnya kami pisahkan menjadi 2 fungsi untut mencatat log.
 -  Terkadang file file yang ada di Downloads tidak muncul semuanya ketika sudah dimount
